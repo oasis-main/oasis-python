@@ -127,3 +127,7 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+/oasis_venv_markets
+delete_accounts.py
+keys.py
