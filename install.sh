@@ -7,7 +7,7 @@ sudo apt-get install python3-venv -y
 echo "Installing nginx"
 sudo apt-get install nginx -y
 echo "Creating VM"
-python3 -m venv /home/ubuntu/oasis-markets/oasis_venv_markets
+python3 -m venv /home/ubuntu/oasis-python/oasis_venv_markets
 echo "Starting VM"
 . oasis_venv_markets/bin/activate
 pip3 install --no-cache-dir -r requirements.txt
