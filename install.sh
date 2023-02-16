@@ -15,7 +15,6 @@ echo "Deactivating VM"
 deactivate
 echo "Configuring nginx"
 sudo ufw allow 'Nginx HTTP'
-sudo cp /home/ubuntu/oasis-python/pages/index.html /var/www/demo.oasis-x.io/html/index.html 
 sudo cp /home/ubuntu/oasis-python/configs/oasis_python_conf_setup.nginx /etc/nginx/sites-available/demo.oasis-x.io 
 sudo ln -s /etc/nginx/sites-available/demo.oasis-x.io /etc/nginx/sites-enabled/ 
 sudo cp /home/ubuntu/oasis-python/configs/oasis_python_global.nginx /etc/nginx/nginx.conf 

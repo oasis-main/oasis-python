@@ -2,7 +2,7 @@ server {
     listen 80;
     listen [::]:80;
 
-    root /var/www/markets.oasis-x.io/html;
+    root /var/www/demo.oasis-x.io/html;
     index index.html index.htm index.nginx-debian.html;
 
     server_name demo.oasis-x.io www.demo.oasis-x.io;
