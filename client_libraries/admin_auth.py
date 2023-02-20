@@ -13,7 +13,7 @@ PWD = OS_PATH + '/oasis-auth'
 sys.path.append(PWD)
 
 from typing import Literal, Dict, Any
-import user_client
+from client_libraries import user_auth
 
 #Cloud URL
 url = "https://auth.oasis-x.io"
@@ -216,7 +216,7 @@ if __name__ == "__main__":
     if sys.argv[1] == "test_changepass":
         print(change_admin_password(admin_email="hello@oasis-x.io"))
 
-    #before running this create a new user & password in the oasis-users group using the user_client testing interface
+    #before running this create a new user & password in the oasis-users group using the user_auth testing interface
     if sys.argv[1] == "test_authentication":
         print("Testing admin login w/ username & password...")
         admin_refresh_token = admin_login(admin_email="hello@oasis-x.io", admin_password=admin_pass, return_tokens=True)
@@ -230,9 +230,9 @@ if __name__ == "__main__":
         print("Testing user access allowances...")
         user_email = "leemichael289@gmail.com"#input("Provide a test-user email address: ")
         user_pass = "insecurepassword"#input("Provide a test-user password: ")
-        print(user_client.password_login(email=user_email, password=user_pass, admin_user_id="N3rLUQG4CQNxRNKZ3cBLN8Wli4v2", group_name="oasis-users"))
-        user_token = user_client.password_login(email=user_email, password=user_pass, admin_user_id="N3rLUQG4CQNxRNKZ3cBLN8Wli4v2", group_name="oasis-users", return_tokens=True)
-        user_id, id_token = user_client.get_session(user_token, admin_user_id="N3rLUQG4CQNxRNKZ3cBLN8Wli4v2", group_name="oasis-users", return_tokens=True) 
+        print(user_auth.password_login(email=user_email, password=user_pass, admin_user_id="N3rLUQG4CQNxRNKZ3cBLN8Wli4v2", group_name="oasis-users"))
+        user_token = user_auth.password_login(email=user_email, password=user_pass, admin_user_id="N3rLUQG4CQNxRNKZ3cBLN8Wli4v2", group_name="oasis-users", return_tokens=True)
+        user_id, id_token = user_auth.get_session(user_token, admin_user_id="N3rLUQG4CQNxRNKZ3cBLN8Wli4v2", group_name="oasis-users", return_tokens=True) 
         #Should succeed
         print(request_user_access(admin_user_id, admin_id_token, user_id, group="oasis-users", data_type = "allowance_count", field = "new_devices_remaining", required = 1))
         #Should succeed
@@ -303,11 +303,11 @@ if __name__ == "__main__":
         print(create_user_group(admin_user_id, admin_id_token, "test-group", {"Doe": "A deer, a female deer", "Ray": "A pocket full of sun"}))
 
         print("Testing writes.")
-        #print(user_client.create_new_user("mike@oasis-x.io", "notpassword", admin_user_id, "test-group"))
+        #print(user_auth.create_new_user("mike@oasis-x.io", "notpassword", admin_user_id, "test-group"))
         #time.sleep(60)
-        refresh_token = user_client.password_login("mike@oasis-x.io", "notpassword", admin_user_id, "test-group", return_tokens=True)
+        refresh_token = user_auth.password_login("mike@oasis-x.io", "notpassword", admin_user_id, "test-group", return_tokens=True)
         print(refresh_token)
-        user_id, id_token = user_client.get_session(refresh_token, admin_user_id, "test-group", return_tokens=True)
+        user_id, id_token = user_auth.get_session(refresh_token, admin_user_id, "test-group", return_tokens=True)
         #should work
         print(write_user_metadata(admin_user_id, admin_id_token, user_id, "test-group", {"Ray": "just a really cool guy, I guess"}))
         #should fail, because you cannot overwrite the default oasis configs
