@@ -1,4 +1,4 @@
 #Change below if running locally
-API_DOMAIN='markets.oasis-x.io'
+API_DOMAIN='https://markets.oasis-x.io'
 #Change below if running locally
-CLIENT_DOMAIN='demo.oasis-x.io'
+CLIENT_DOMAIN='https://demo.oasis-x.io'
