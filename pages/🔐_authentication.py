@@ -11,3 +11,22 @@ cwd = os.getcwd()
 sys.path.append(cwd)
 
 import streamlit as st
+from client_libraries import user_auth
+
+def run():
+    st.title("Oasis-Authe Demo (Users)")
+
+    st.subheader("Create New User")
+
+    st.subheader("Change Password")
+
+    st.subheader("Password Login")
+
+    st.subheader("Get Session")
+
+    st.subheader("Verify Session")
+
+    st.subheader("Delete User")
+    
+
+run()

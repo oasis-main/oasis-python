@@ -1,1 +1,1 @@
-streamlit run welcome.py
+streamlit run 👋_welcome.py
