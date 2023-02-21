@@ -1,8 +1,5 @@
+#Page for oasis-markets demo
 import sys
-import json
-import httpx
-
-import requests
 
 # import shell modules
 import sys
@@ -12,12 +9,15 @@ import os
 # cwd/pwd/whatever we want to call it until the module has been integrated with the existing code base
 cwd = os.getcwd()
 sys.path.append(cwd)
-import lib
+from client_libraries import stripe_markets as transactions
 
 import streamlit as st
-import streamlit.components.v1 as components
+
+import config
+client_uri = config.CLIENT_DOMAIN
 
 def run():
-  st.title('Subscription successfully created!')
+    st.title("Welcome to the Oasis-Ecosystem API Guide")
+    st.subheader("Browse our demos to the left for easy developer tools w/ quickstart guides.")
 
 run()

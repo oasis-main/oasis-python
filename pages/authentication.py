@@ -1,8 +1,5 @@
+#Page for oasis-auth demo
 import sys
-import json
-import httpx
-
-import requests
 
 # import shell modules
 import sys
@@ -12,12 +9,5 @@ import os
 # cwd/pwd/whatever we want to call it until the module has been integrated with the existing code base
 cwd = os.getcwd()
 sys.path.append(cwd)
-import lib
 
 import streamlit as st
-import streamlit.components.v1 as components
-
-def run():
-  st.title('Subscription creation canceled')
-
-run()
