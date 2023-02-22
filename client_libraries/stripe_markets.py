@@ -35,7 +35,7 @@ def create_line_item(price: str, quantity: int = 1):
 
 #Product functions
 def create_product(unit_amount: float, name: str, description: str, interval: str):
-    path = server_uri + '/product/create'
+    path = server_uri + '/product/create/'
     params = {
         'unit_amount': unit_amount,
         'name': name,
@@ -48,7 +48,7 @@ def create_product(unit_amount: float, name: str, description: str, interval: st
     return data
 
 def list_products():
-    path = server_uri + '/product/list'
+    path = server_uri + '/product/list/'
     response = httpx.get(path)
     attempt_result = json.loads(response.text)
     data = attempt_result.get('data')
@@ -56,7 +56,7 @@ def list_products():
 
 #Price functions
 def list_prices():
-    path = server_uri + '/price/list'
+    path = server_uri + '/price/list/'
     response = httpx.get(path)
     attempt_result = json.loads(response.text)
     data = attempt_result.get('data')
@@ -65,14 +65,14 @@ def list_prices():
 #Customer functions
 
 def list_customers():
-    path = server_uri + '/customer/list'
+    path = server_uri + '/customer/list/'
     response = httpx.get(path)
     attempt_result = json.loads(response.text)
     data = attempt_result.get('data')
     return data
 
 def create_customer(oasis_x_id: str, email_addr: str, name: str):
-    path = server_uri + '/customer/create'
+    path = server_uri + '/customer/create/'
     params = {
         'email_addr': email_addr,
         'oasis_x_id': oasis_x_id,
@@ -85,7 +85,7 @@ def create_customer(oasis_x_id: str, email_addr: str, name: str):
 
 #Subscription functions
 def list_subscriptions(customer_id: str):
-    path = server_uri + '/subscription/list'
+    path = server_uri + '/subscription/list/'
     response = httpx.get(path)
     attempt_result = json.loads(response.text)
     data = attempt_result.get('data')
@@ -93,7 +93,7 @@ def list_subscriptions(customer_id: str):
 
 #Checkout functions
 def create_checkout_session(price_id: str, quantity: int, mode: str, success_url: str, cancel_url: str):
-    path = server_uri + '/checkout/create'
+    path = server_uri + '/checkout/create/'
     params = {'price_id': price_id, 'quantity': quantity, 'mode': mode, 'success_url': success_url, 'cancel_url': cancel_url }
     r = httpx.post(path, params = params)
     attempt_result = json.loads(r.text) #we're going to have to parse this into a return json for each one
