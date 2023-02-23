@@ -20,14 +20,14 @@ from PIL import Image
 
 
 def run():
-    st.title("Welcome to the Oasis-Ecosystem API Guide")
+    st.title("Oasis-Ecosystem API Demo")
     
+    st.markdown("Simple developer tools for managing data collection, process control, and machine learning applications.")
     image = Image.open('media/welcome_image.png')
     st.image(image)
-    st.markdown("Simple tools for managing data collection, process control, and machine learning applications.")
     
     st.subheader("Client Library Quickstart")
-    st.write("Get started using the oasis libraries in 3 lines of code:")
+    st.write("Get started using the library with 3 lines of code:")
     st.code('''git clone https://github.com/oasis-main/oasis-python.git
 cd oasis-python
 . setup_scripts/env_setup.sh
@@ -38,7 +38,8 @@ cd oasis-python
 user_auth.create_new_user(email, password, admin_id, group_name)''', language='python')
     st.write("To call from a different directory than the library itself, have the calling script execute this line first:")
     st.code('''import sys
-sys.path.append("/path/you/git/cloned/into/oasis-python")''', language = 'python')
+sys.path.append("/path/you/git/cloned/into/oasis-python")
+from client_libraries import user_auth''', language = 'python')
 
     st.subheader("Demo Application Quickstart")
     st.write("Spin up a demo version of this app on your local machine:")

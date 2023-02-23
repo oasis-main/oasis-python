@@ -22,7 +22,7 @@ def run():
 
         email = st.text_input("Email", help="You'll have to verify this before logging in.")
         password = st.text_input("Password")
-        custom_admin = st.checkbox("Test with custom admin credentials?")
+        custom_admin = st.checkbox("Test with custom admin credentials?", value = False)
         if custom_admin:
             admin_user_id = st.text_input("Admin ID")
             group_name = st.text_input("User Group")

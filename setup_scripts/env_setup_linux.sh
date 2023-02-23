@@ -1,8 +1,4 @@
 #!/bin/sh -e
-
-echo "Installing uvicorn"
-sudo apt-get install uvicorn -y #FastAPI Runtime
-
 echo "Installing python3-pip"
 sudo apt-get install python3-pip -y
 
@@ -10,7 +6,7 @@ echo "Installing python3-venv"
 sudo apt-get install python3-venv -y
 
 echo "Creating VM"
-python3 -m venv /home/ubuntu/oasis-python/oasis_venv_python
+python3 -m venv ./oasis_venv_python
 
 echo "Starting VM"
 . oasis_venv_python/bin/activate
