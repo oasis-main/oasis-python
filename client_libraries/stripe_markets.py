@@ -5,7 +5,6 @@ import sys
 import json
 import httpx
 
-import requests
 
 # import shell modules
 import sys
@@ -18,8 +17,6 @@ cwd = os.getcwd()
 sys.path.append(cwd)
 
 import config
-import streamlit as st
-import streamlit.components.v1 as components
 
 #server_uri = 'http://localhost:8502'
 server_uri = config.API_DOMAIN

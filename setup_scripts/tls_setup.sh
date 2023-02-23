@@ -7,4 +7,6 @@ sudo cp /home/ubuntu/oasis-python/configs/oasis_python_secure.nginx /etc/nginx/s
 sudo systemctl reload nginx
 sudo ufw allow 'Nginx Full'
 sudo ufw delete allow 'Nginx HTTP'
+
+echo "Restartign Nginx"
 sudo systemctl restart nginx

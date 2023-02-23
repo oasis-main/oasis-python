@@ -1,4 +1,2 @@
-streamlit==1.17.0
-stripe==5.0.0
 httpx==0.23.1
 orjson==3.8.3
