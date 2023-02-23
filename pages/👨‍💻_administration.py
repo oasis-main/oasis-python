@@ -11,6 +11,10 @@ cwd = os.getcwd()
 sys.path.append(cwd)
 
 import streamlit as st
+st.set_page_config(page_title=" Oasis-X", 
+				   page_icon = 'media/icon.png', 
+				   layout = "wide")
+                   
 from client_libraries import user_auth
 
 def run():

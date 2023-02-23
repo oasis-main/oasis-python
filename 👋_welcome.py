@@ -29,32 +29,38 @@ def run():
     st.image(image)
     
     st.subheader("Client Quickstart")
-    operating_system = st.radio("What operating system are you using?", ["Linux", "MacOS"], index = 0)
+    col1, col2 = st.columns([3,2])
     
-    st.write("Get started using the library with 3 lines of code:")
+    operating_system = col2.radio("What operating system are you using?", ["Linux", "MacOS"], index = 0)
+    
+    col1.write("Get started using the library with 3 lines of code:")
     
     if operating_system == "Linux":
-        st.code('''git clone https://github.com/oasis-main/oasis-python.git
+        col1.code('''git clone https://github.com/oasis-main/oasis-python.git
 cd oasis-python
 . setup_scripts/env_setup_linux.sh
 ''', language="bash") #Python streamlit code has to be "against the wall" as it indents weirdly otherwise
     
     if operating_system == "MacOS":
-        st.code('''git clone https://github.com/oasis-main/oasis-python.git
+        col1.code('''git clone https://github.com/oasis-main/oasis-python.git
 cd oasis-python
 . setup_scripts/env_setup_macos.sh
 ''', language="bash")
 
-    st.write("This allows API usage from any python interpreter, like so:")
+    col1.write("This allows API usage from any python interpreter, like so:")
     
-    st.code('''from client_libraries import user_auth, user_txns
+    col1.code('''from client_libraries import user_auth, user_txns
 user_auth.create_new_user(email, password, admin_id, group_name)''', language='python')
     
-    st.write("To call from a different directory than the library itself, have the importing script execute this line first:")
+    col1.write("To call from a different directory than the library itself, have the importing script execute this line first:")
     
-    st.code('''import sys
+    col1.code('''import sys
 sys.path.append("/path/you/git/cloned/into/oasis-python")
 from client_libraries import user_auth''', language = 'python')
+
+    col1.write("You may also make REST API calls to the various services, documented at: ")
+    col1.code('''https://auth.oasis-x.io/docs
+https://markets.oasis-x.io/docs''')
 
     st.subheader("Demo Quickstart")
     st.write("This app is open-source. To spin up a demo version on your local machine:")

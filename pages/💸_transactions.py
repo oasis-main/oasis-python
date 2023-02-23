@@ -12,6 +12,9 @@ sys.path.append(cwd)
 from client_libraries import stripe_markets as transactions
 
 import streamlit as st
+st.set_page_config(page_title=" Oasis-X", 
+				   page_icon = 'media/icon.png', 
+				   layout = "wide")
 
 import config
 client_uri = config.CLIENT_DOMAIN
