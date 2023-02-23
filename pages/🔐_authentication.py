@@ -50,7 +50,7 @@ def run():
         else:
             left_col.error(submission["message"])
 
-    code_example = right_col.expander("Code Example")
+    code_example = right_col.expander("Code Example (Python)")
     code_example.write("Here's how to imlement this in your app using the oasis-python library:")
     code_example.code("""from client_libraries import user_auth #Make sure the environment is set up
 login_result = user_auth.create_new_user(email, password, admin_user_id, group_name) # pings authentication server
@@ -60,7 +60,7 @@ login_result["message"] # information about the request
 login_result["data"]["refresh_token"] # api token for obtaining user sessions 
 """, language = "python") #Leave this off to the left of streamlit will indent it, unfortunately
     
-    request_example = right_col.expander("Request Example")
+    request_example = right_col.expander("Request Example (HTTPS)")
     request_example.write("Not a python user? No problem. Here's the request URL with parameters in bold so you use the bare REST API instead:")
     try:
         request_str = submission["url"]
