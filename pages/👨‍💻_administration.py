@@ -3,19 +3,19 @@ import sys
 
 # import shell modules
 import sys
-import os
 
 # Rather than manually specify these values on everyone's environment, it probaly makes sense to use a function to get the
 # cwd/pwd/whatever we want to call it until the module has been integrated with the existing code base
-cwd = os.getcwd()
-sys.path.append(cwd)
+import config
+PWD = config.OS_PATH + config.CWD
+sys.path.append(PWD)
 
 import streamlit as st
-st.set_page_config(page_title=" Oasis-X", 
+st.set_page_config(page_title=" Oasis-Admin", 
 				   page_icon = 'media/icon.png', 
 				   layout = "wide")
-                   
-from client_libraries import user_auth
+
+from client_libraries import admin_auth
 
 def run():
     st.title("Oasis-Authe Demo (Admins)")

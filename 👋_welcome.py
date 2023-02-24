@@ -9,7 +9,7 @@ import os
 # cwd/pwd/whatever we want to call it until the module has been integrated with the existing code base
 cwd = os.getcwd()
 sys.path.append(cwd)
-from client_libraries import stripe_markets as transactions
+from client_libraries import admin_txns as transactions
 
 import streamlit as st
 st.set_page_config(page_title=" Oasis-X", 
@@ -29,7 +29,7 @@ def run():
     st.image(image)
     
     st.subheader("Client Quickstart")
-    col1, col2 = st.columns([3,2])
+    col1, col2 = st.columns([3,1])
     
     operating_system = col2.radio("What operating system are you using?", ["Linux", "MacOS"], index = 0)
     

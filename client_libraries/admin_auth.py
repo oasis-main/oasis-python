@@ -6,25 +6,20 @@ import orjson
 import httpx
 from datetime import datetime
 
-#OS_PATH = '/Users/Michaellee/Documents/Runes/oasis-x' #local
-#OS_PATH = "/home/sean/code/oasis-x"
-OS_PATH = "/home/ubuntu"
-PWD = OS_PATH + '/oasis-auth'
-sys.path.append(PWD)
-
 from typing import Literal, Dict, Any
 
-import user_auth
+import config
+PWD = config.OS_PATH + config.CWD
+sys.path.append(PWD)
+
+from client_libraries import user_auth
 from utils import results
 
-#Cloud URL
-url = "https://auth.oasis-x.io"
-#Local URL
-#url = "http://localhost:8000"
+url = config.AUTH_DOMAIN
 
 def create_admin_account(admin_email: str, admin_password: str):
     params = {"admin_email": admin_email, "admin_password": admin_password}
-    r = httpx.put(url +'/admin/new_account/', params = params)
+    r = httpx.post(url +'/admin/new_account/', params = params)
     #print(r.content)
     try:
         result = orjson.loads(r.content) 

@@ -28,7 +28,7 @@ def response(attempt: Optional[bool], allowed: Optional[bool], message: str = "R
 	response =  {"attempt": attempt_result(attempt), "allowed": allowed_result(allowed), "message": message}
 
 	if data is not None:
-		response.update(data)
+		response.update({"data": data})
 
 	if url is not None:
 		response.update({"url": url})
