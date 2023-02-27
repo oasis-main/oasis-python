@@ -24,7 +24,7 @@ def allowed_result(allowed: Union[bool, None]):
 	else:
 		return "N/A"
 
-def response(attempt: Optional[bool], allowed: Optional[bool], message: str = "Responses without messages are not allowed", data: Optional[Dict[str, Any]] = None, url: Optional[str] = None):
+def response(attempt: Optional[bool], allowed: Optional[bool], message: str = "Responses without messages are not allowed", data: Optional[Dict[str, Any]] = None, url: Optional[str] = None, response_code: Optional[Any] = None):
 	response =  {"attempt": attempt_result(attempt), "allowed": allowed_result(allowed), "message": message}
 
 	if data is not None:
@@ -32,5 +32,8 @@ def response(attempt: Optional[bool], allowed: Optional[bool], message: str = "R
 
 	if url is not None:
 		response.update({"url": url})
+
+	if response_code is not None:
+		response.update({"response_code": response_code})
 	
 	return response
