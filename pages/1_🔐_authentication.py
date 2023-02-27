@@ -35,11 +35,11 @@ def run():
     
     contents = st.expander("Table of Contents")
     contents.markdown("[1. Creating New Users](#create-new-user)")
-    contents.markdown("[2. User Login w/ Password](#password-login)")
+    contents.markdown("[2. User Login w/ Password](#user-password-login)")
     contents.markdown("[3. Getting a User Session](#get-user-session)")
     contents.markdown("[4. Verifying a User Session](#verify-user-session)")
     contents.markdown("[5. Password Reset Requests](#change-user-password)")
-    contents.markdown("[6. Delete User (Self)](#user-account-deletion)")
+    contents.markdown("[6. Delete User (Self)](#delete-user-account)")
     
     admin = st.expander("Admin Settings")
     admin.write("Visit the 👨‍💻 administration page for more info on creating an admin account to manage groups of users.")
@@ -94,6 +94,7 @@ creation_result = user_auth.create_new_user(email, password, admin_user_id, grou
 creation_result["attempt"] # "succeeded" or "failed"
 creation_result["allowed"] # "ok" or "no
 creation_result["message"] # information about the request
+creation_result["response_code"] # status code of the https request made to server
 creation_result["url"] # url of the web request made to server
 """, language = "python") #Leave this off to the left of streamlit will indent it, unfortunately
     
@@ -121,7 +122,7 @@ Then, using a https library, make an appropriate call to the endpoint. After com
     col_1, col_2 = st.columns(2)
     col_1.subheader("User Password Login")
     col_2.write("")
-    col_2.write("REST API (POST): https://auth.oasis-x.io/user/login/password")
+    col_2.write("REST API (POST): https://auth.oasis-x.io/user/login/password/")
     st.write("*Submit a valid username and password to get a refresh token, which is can be used to obtain a temporary user session*")
     new_user_form = st.form("Login")
 
@@ -148,7 +149,6 @@ login_result["attempt"] # "succeeded" or "failed"
 login_result["allowed"] # "ok" or "no
 login_result["message"] # information about the request
 login_result["data"]["refresh_token"] # api token for obtaining user sessions 
-login_result["url"] # url of the web request made to server
 """, language = "python") #Leave this off to the left of streamlit will indent it, unfortunately
     
     #Show how the request is put together
@@ -175,7 +175,7 @@ Then, using a https library, make an appropriate call to the endpoint. After com
     col_1, col_2 = st.columns(2)
     col_1.subheader("Get User Session")
     col_2.write("")
-    col_2.write("REST API (POST): https://auth.oasis-x.io/user/login/session")
+    col_2.write("REST API (POST): https://auth.oasis-x.io/user/login/session/")
     st.write("*Uses the refresh token to obtain a user session, which can be validated to control application access*")
     new_user_form = st.form("Get Session")
 
@@ -200,9 +200,10 @@ session_result = user_auth.get_session(refresh_token, admin_user_id, group_name)
 session_result["attempt"] # "succeeded" or "failed"
 session_result["allowed"] # "ok" or "no
 session_result["message"] # information about the request
+session_result["url"] # url of the web request made to server
+
 session_result["data"]["user_id"] # the user's unique user identifier
 session_result["data"]["id_token"] # the user's unique session identifier
-session_result["url"] # url of the web request made to server
 """, language = "python") #Leave this off to the left of streamlit will indent it, unfortunately
     
     #Show how the request is put together
@@ -234,7 +235,7 @@ Then, using a https library, make an appropriate call to the endpoint. After com
     col_1, col_2 = st.columns(2)
     col_1.subheader("Verify User Session")
     col_2.write("")
-    col_2.write("REST API (POST): https://auth.oasis-x.io/user/verify_session")
+    col_2.write("REST API (POST): https://auth.oasis-x.io/user/verify_session/")
     st.write("*Uses the the 'id_token' and 'user_id' data from above to validate a user session. Ideal to check access on clients with **limited permission** (iot devices, web browsers, public terminals & displays)*")
     new_user_form = st.form("Verify Session")
 
@@ -271,7 +272,9 @@ else:
     print(verification_result["message"]) #For more information into the nature of the error, you can inspect the message
     print(verification_result["response_code"]) #As well as the http response code: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status
 
-#This one doesn't come with any data, just the stanard response
+#This one doesn't come with any data, just the standard response
+verification_result["attempt"] # "succeeded" or "failed"
+verification_result["allowed"] # "ok" or "no
 verification_result["message"] # information about the request
 verification_result["url"] # url of the web request made to server
 """
@@ -305,7 +308,7 @@ Then, using a https library, make an appropriate call to the endpoint. After com
     col_1, col_2 = st.columns(2)
     col_1.subheader("Change User Password")
     col_2.write("")
-    col_2.write("REST API (POST): https://auth.oasis-x.io/user/change_password")
+    col_2.write("REST API (POST): https://auth.oasis-x.io/user/change_password/")
     st.write("*Change a user's password from the server. Ideal for when a user has forgotten their login info*")
     new_user_form = st.form("Change Password")
 
@@ -342,8 +345,11 @@ else:
     print(change_result["response_code"]) #As well as the http response code: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status
 
 #This one doesn't come with any additional data, just the standard response ("attempt","allowed","message","url")
+change_result["attempt"] # "succeeded" or "failed"
+change_result["allowed"] # "ok" or "no
 change_result["message"] # information about the request
 change_result["url"] # url of the web request made to server
+
 """
 , language = "python") #Leave this off to the left or streamlit will indent it, unfortunately
     
@@ -370,7 +376,7 @@ Then, using a https library, make an appropriate call to the endpoint. After com
     col_1, col_2 = st.columns(2)
     col_1.subheader("Delete User Account")
     col_2.write("")
-    col_2.write("REST API (DELETE): https://auth.oasis-x.io/user/delete_account")
+    col_2.write("REST API (DELETE): https://auth.oasis-x.io/user/delete_account/")
     st.write("*Delete a user's account from the server. Ideal for when a user no longer needs access to the system*")
     new_user_form = st.form("Delete Account")
 
