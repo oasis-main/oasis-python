@@ -129,8 +129,8 @@ def read_user_metadata(admin_user_id: str, admin_id_token: str, user_id: str, gr
     except:
         return results.response(attempt=False, allowed=False, message = "Could not orjson.loads the response object",url=str(r.url))
 
-def write_user_metadata(admin_user_id: str, admin_id_token: str, user_id: str, group: str, dictionary: Dict[str, Any]): #all dicts passed to fastapi over HTTP must be string representations
-    params = {"admin_user_id": admin_user_id, "admin_id_token": admin_id_token, "user_id": user_id, "group": group, "dictionary": orjson.dumps(dictionary)}
+def write_user_metadata(admin_user_id: str, admin_id_token: str, user_id: str, group: str, dictionary: Dict[str, Any]): #all dicts passed to fastapi over HTTP must be byte representations
+    params = {"admin_user_id": admin_user_id, "admin_id_token": admin_id_token, "user_id": user_id, "group": group, "dictionary": orjson.dumps(dictionary)} #make sure to serialize the calling object, wherever it is
     r = httpx.post(url +'/admin/write_user/', params = params)
     #print(r)
     #print(r.content)

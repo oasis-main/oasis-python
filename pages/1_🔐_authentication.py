@@ -27,6 +27,8 @@ if "user_id" not in st.session_state:
     st.session_state["user_id"] = None
 if "id_token" not in st.session_state:
     st.session_state["id_token"] = None
+    if "user_email" not in st.session_state:
+        st.session_state["user_email"] = None
 
 def run():
 #Page title and intro
@@ -103,6 +105,9 @@ creation_result["url"] # url of the web request made to server
     request_example.write("Here's the request URL with parameter values so you can use the REST API:")
     try:
         request_str = submission["url"]
+        #If the above worked it means that we may have some valid values. Let's save them to session state
+        #Save email for ease of login
+        st.session_state["user_email"] = email
     except:
         request_str = user_auth.create_new_user("PLACEHOLDER", "PLACEHOLDER", "PLACEHOLDER", "PLACEHOLDER")["url"] #This should return a failure, but the URL should be intact
     request_example.write(request_str)
@@ -126,7 +131,7 @@ Then, using a https library, make an appropriate call to the endpoint. After com
     st.write("*Submit a valid username and password to get a refresh token, which is can be used to obtain a temporary user session*")
     new_user_form = st.form("Login")
 
-    email = new_user_form.text_input("Email", help="You'll have to verify this before logging in.")
+    email = new_user_form.text_input("Email", help="You'll have to verify this before logging in.", value = st.session_state["user_email"])
     password = new_user_form.text_input("Password", type="password")
 
     # Every form must have a submit button.
