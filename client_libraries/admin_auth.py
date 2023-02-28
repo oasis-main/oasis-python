@@ -6,46 +6,46 @@ import orjson
 import httpx
 from datetime import datetime
 
-#OS_PATH = '/Users/Michaellee/Documents/Runes/oasis-x' #local
-#OS_PATH = "/home/sean/code/oasis-x"
-OS_PATH = "/home/ubuntu"
-PWD = OS_PATH + '/oasis-auth'
+from typing import Literal, Dict, Any
+
+import config
+PWD = config.OS_PATH + config.CWD
 sys.path.append(PWD)
 
-from typing import Literal, Dict, Any
 from client_libraries import user_auth
+from utils import results
 
-#Cloud URL
-url = "https://auth.oasis-x.io"
-#Local URL
-#url = "http://localhost:8000"
+url = config.AUTH_DOMAIN
 
 def create_admin_account(admin_email: str, admin_password: str):
     params = {"admin_email": admin_email, "admin_password": admin_password}
-    r = httpx.put(url +'/admin/new_account/', params = params)
+    r = httpx.post(url +'/admin/new_account/', params = params)
     #print(r.content)
     try:
         result = orjson.loads(r.content) 
+        result.update({"url": str(r.url)})
         return result 
     except:
-        return r.content
+        return results.response(attempt=False, allowed=False, message = "Could not orjson.loads the response object",url=str(r.url))
 
 def change_admin_password(admin_email: str):
     params = {"admin_email": admin_email}
     r = httpx.post(url +'/admin/change_password/', params = params)
     try:
         result = orjson.loads(r.content) 
+        result.update({"url": str(r.url)})
         return result 
     except:
-        return r.content
+        return results.response(attempt=False, allowed=False, message = "Could not orjson.loads the response object",url=str(r.url))
 
 def admin_login(admin_email: str, admin_password: str, return_tokens = False):
     params = {"admin_email": admin_email, "admin_password": admin_password}
     r = httpx.post(url +'/admin/login/password/', params = params)
     try:
         login_result = orjson.loads(r.content) 
+        login_result.update({"url": str(r.url)})
     except:
-        return r.content
+        return results.response(attempt=False, allowed=False, message = "Could not orjson.loads the response object",url=str(r.url))
     
     if return_tokens and r.status_code == httpx.codes.OK:
         admin_refresh_token = login_result["data"]["admin_refresh_token"]
@@ -58,8 +58,9 @@ def get_admin_session(admin_refresh_token: str, return_tokens = False):
     r = httpx.post(url +'/admin/login/session/', params = params)
     try:
         session_result = orjson.loads(r.content)
+        session_result.update({"url": str(r.url)})
     except:
-        return r.content
+        return results.response(attempt=False, allowed=False, message = "Could not orjson.loads the response object",url=str(r.url))
     #print(session_result) #debugging
     if return_tokens and r.status_code == httpx.codes.OK:
         admin_user_id = session_result["data"]["admin_user_id"]
@@ -73,26 +74,29 @@ def verify_admin_session(admin_user_id: str, admin_id_token: str):
     r = httpx.post(url +'/admin/verify_session/', params = params)
     try:
         result = orjson.loads(r.content) 
+        result.update({"url": str(r.url)})
         return result 
     except:
-        return r.content
+        return results.response(attempt=False, allowed=False, message = "Could not orjson.loads the response object",url=str(r.url))
 
 def create_user_group(admin_user_id: str, admin_id_token: str, new_group_name: str, group_user_params: Dict[str, Any] = {}):
     params = {"admin_user_id": admin_user_id, "admin_id_token": admin_id_token, "new_group_name": new_group_name, "group_user_params" : orjson.dumps(group_user_params) }
     r = httpx.post(url +'/admin/create_user_group/', params = params)
     try:
         result = orjson.loads(r.content) 
+        result.update({"url": str(r.url)})
         return result 
     except:
-        return r.content
+        return results.response(attempt=False, allowed=False, message = "Could not orjson.loads the response object",url=str(r.url))
 
 def get_admins_groups(admin_user_id: str, admin_id_token: str, return_list = False):
     params = {"admin_user_id": admin_user_id, "admin_id_token": admin_id_token}
     r = httpx.get(url +'/admin/get_user_groups/', params = params)
     try:
         result = orjson.loads(r.content)
+        result.update({"url": str(r.url)})
     except:
-        return r.content
+        return results.response(attempt=False, allowed=False, message = "Could not orjson.loads the response object",url=str(r.url))
     
     if return_list and r.status_code == httpx.codes.OK:
         groups = result["data"]["groups"]
@@ -105,8 +109,9 @@ def get_group_users(admin_user_id: str, admin_id_token: str, group_name: str, re
     r = httpx.get(url +'/admin/get_group_users/', params = params)
     try:
         result = orjson.loads(r.content)
+        result.update({"url": str(r.url)})
     except:
-        return r.content
+        return results.response(attempt=False, allowed=False, message = "Could not orjson.loads the response object",url=str(r.url))
     
     if return_list and r.status_code == httpx.codes.OK:
         users = result["data"]["users"]
@@ -119,39 +124,43 @@ def read_user_metadata(admin_user_id: str, admin_id_token: str, user_id: str, gr
     r = httpx.get(url +'/admin/read_user/', params = params)
     try:
         result = orjson.loads(r.content) 
+        result.update({"url": str(r.url)})
         return result 
     except:
-        return r.content
+        return results.response(attempt=False, allowed=False, message = "Could not orjson.loads the response object",url=str(r.url))
 
-def write_user_metadata(admin_user_id: str, admin_id_token: str, user_id: str, group: str, dictionary: Dict[str, Any]): #all dicts passed to fastapi over HTTP must be string representations
-    params = {"admin_user_id": admin_user_id, "admin_id_token": admin_id_token, "user_id": user_id, "group": group, "dictionary": orjson.dumps(dictionary)}
+def write_user_metadata(admin_user_id: str, admin_id_token: str, user_id: str, group: str, dictionary: Dict[str, Any]): #all dicts passed to fastapi over HTTP must be byte representations
+    params = {"admin_user_id": admin_user_id, "admin_id_token": admin_id_token, "user_id": user_id, "group": group, "dictionary": orjson.dumps(dictionary)} #make sure to serialize the calling object, wherever it is
     r = httpx.post(url +'/admin/write_user/', params = params)
     #print(r)
     #print(r.content)
     #print(r.url)
     try:
         result = orjson.loads(r.content) 
+        result.update({"url": str(r.url)})
         return result 
     except:
-        return r.content
+        return results.response(attempt=False, allowed=False, message = "Could not orjson.loads the response object",url=str(r.url))
 
 def request_user_access(admin_user_id: str, admin_id_token: str, user_id: str, group: str, data_type: Literal["allowance_count","credit_balance","clearance_code"], field: str, required: str, emissions_kg: float = 0.0000, check_only: bool = False):
     params = {"admin_user_id": admin_user_id, "admin_id_token": admin_id_token, "user_id": user_id, "group": group, "data_type": data_type, "field": field, "required": required, "emissions_kg": emissions_kg, "check_only": check_only}
     r = httpx.post(url +'/admin/user_access_request/', params = params)
     try:
         result = orjson.loads(r.content) 
+        result.update({"url": str(r.url)})
         return result 
     except:
-        return r.content
+        return results.response(attempt=False, allowed=False, message = "Could not orjson.loads the response object",url=str(r.url))
 
 def reset_user(admin_user_id: str, admin_id_token: str, user_id: str, group_name: str):
     params = {"admin_user_id": admin_user_id, "admin_id_token": admin_id_token, "user_id": user_id, "group_name": group_name}
     r = httpx.post(url +'/admin/reset_user/', params=params)
     try:
         result = orjson.loads(r.content)
+        result.update({"url": str(r.url)})
         return result
     except:
-        return r.content
+        return results.response(attempt=False, allowed=False, message = "Could not orjson.loads the response object",url=str(r.url))
 
 def change_group_schema(admin_user_id: str, admin_id_token: str, group_name: str, new_schema_dict: Dict[str, Any], reset_all: bool):
     params = {"admin_user_id": admin_user_id, "admin_id_token": admin_id_token, "group_name": group_name, "new_schema_dict": orjson.dumps(new_schema_dict), "reset_all": reset_all}
@@ -161,18 +170,20 @@ def change_group_schema(admin_user_id: str, admin_id_token: str, group_name: str
     #print(r.url)
     try:
         result = orjson.loads(r.content) 
+        result.update({"url": str(r.url)})
         return result 
     except:
-        return r.content
+        return results.response(attempt=False, allowed=False, message = "Could not orjson.loads the response object",url=str(r.url))
 
 def admin_delete_user(admin_user_id: str, admin_id_token: str, user_id: str, group_name: str):
     params = {"admin_user_id": admin_user_id, "admin_id_token": admin_id_token, "user_id": user_id, "group_name": group_name}
     r = httpx.delete(url +'/admin/delete_user/', params = params)
     try:
         result = orjson.loads(r.content) 
+        result.update({"url": str(r.url)})
         return result 
     except:
-        return r.content
+        return results.response(attempt=False, allowed=False, message = "Could not orjson.loads the response object",url=str(r.url))
 
 def delete_group(admin_user_id: str,admin_id_token: str, group_name: str):
     params = {"admin_user_id": admin_user_id, "admin_id_token": admin_id_token, "group_name": group_name}
@@ -182,18 +193,20 @@ def delete_group(admin_user_id: str,admin_id_token: str, group_name: str):
     print(r.url)
     try:
         result = orjson.loads(r.content) 
+        result.update({"url": str(r.url)})
         return result 
     except:
-        return r.content
+        return results.response(attempt=False, allowed=False, message = "Could not orjson.loads the response object",url=str(r.url))
 
 def delete_admin_account(admin_email: str, admin_password: str):
     params = {"admin_email": admin_email, "admin_password": admin_password}
     r = httpx.delete(url +'/admin/delete_admin_account/', params = params)
     try:
         result = orjson.loads(r.content) 
+        result.update({"url": str(r.url)})
         return result 
     except:
-        return r.content
+        return results.response(attempt=False, allowed=False, message = "Could not orjson.loads the response object",url=str(r.url))
 
 if __name__ == "__main__":
     print("This is a Unit Test: Oasis-Auth User Client")

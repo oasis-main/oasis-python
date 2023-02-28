@@ -3,37 +3,43 @@ import sys
 import orjson
 import httpx
 
-#Cloud URL
-url = "https://auth.oasis-x.io"
-#Local URL
-#url = "http://localhost:8000"
+import config
+from utils import results
+
+import config
+PWD = config.OS_PATH + config.CWD
+sys.path.append(PWD)
+url = config.AUTH_DOMAIN
 
 def create_new_user(email: str, password: str, admin_user_id: str, group_name: str):
     params = {"email": email, "password": password, "admin_user_id": admin_user_id, "group_name": group_name}
-    r = httpx.post(url +'/user/create_account/', params = params)
+    r = httpx.post(url + '/user/create_account/', params = params)
     #print(r.content)
     try:
         attempt_result = orjson.loads(r.content) #we're going to have to parse this into a return json for each one
+        attempt_result.update({"url": str(r.url)})
         return attempt_result # The name of the return variable should tell us how to parse the resulting dictionary 
     except:
-        return r.content 
+        return results.response(attempt=False,allowed=False,message="Could not orjson.loads the response object", url=str(r.url)) 
 
 def change_password(email: str, admin_user_id: str, group_name: str):
     params = {"email": email, "admin_user_id": admin_user_id, "group_name": group_name}
     r = httpx.post(url +'/user/change_password/' , params = params)
     try:
         attempt_result = orjson.loads(r.content)
+        attempt_result.update({"url": str(r.url)})
         return attempt_result # The name of the return variable should tell us how to parse the resulting dictionary 
     except:
-        return r.content 
+        return results.response(attempt=False,allowed=False,message="Could not orjson.loads the response object",url=str(r.url)) 
 
 def password_login(email: str, password: str, admin_user_id: str, group_name: str, return_tokens = False):
     params = {"email": email, "password": password, "admin_user_id": admin_user_id, "group_name": group_name}
     r = httpx.post(url +'/user/login/password/' , params = params)
     try:
         login_result = orjson.loads(r.content)
+        login_result.update({"url": str(r.url)})
     except:
-        return r.content 
+        return results.response(attempt=False,allowed=False,message="Could not orjson.loads the response object",url=str(r.url)) 
     
     if return_tokens and r.status_code == httpx.codes.OK:
         refresh_token = login_result["data"]["refresh_token"]
@@ -46,9 +52,10 @@ def get_session(refresh_token: str, admin_user_id: str, group_name: str, return_
     r = httpx.post(url +'/user/login/session/', params = params)
     try:
         session_result = orjson.loads(r.content)
-        print(session_result)
+        session_result.update({"url": str(r.url)})
+        #print(session_result)
     except:
-        return r.content 
+        return results.response(attempt=False,allowed=False,message="Could not orjson.loads the response object",url=str(r.url)) 
     
     if return_tokens and r.status_code == httpx.codes.OK:
         user_id = session_result["data"]["user_id"]
@@ -62,18 +69,20 @@ def verify_session(user_id: str, id_token: str, admin_user_id: str, group_name: 
     r = httpx.post(url +'/user/verify_session/' , params = params)
     try:
         allowed_result = orjson.loads(r.content)
+        allowed_result.update({"url": str(r.url)})
         return allowed_result # The name of the return variable should tell us how to parse the resulting dictionary
     except:
-        return r.content 
+        return results.response(attempt=False,allowed=False,message="Could not orjson.loads the response object",url=str(r.url)) 
 
 def delete_user(user_id: str, password: str, admin_user_id: str, group_name: str):
     params = {"user_id": user_id, "password": password, "admin_user_id": admin_user_id, "group_name": group_name}
     r = httpx.delete(url +'/user/delete_account/' , params = params)
     try:
         attempt_result = orjson.loads(r.content)
+        attempt_result.update({"url": str(r.url)})
         return attempt_result # The name of the return variable should tell us how to parse the resulting dictionary
     except:
-        return r.content 
+        return results.response(attempt=False,allowed=False,message="Could not orjson.loads the response object",url=str(r.url)) 
 
 if __name__ == "__main__":
     print("This is a Unit Test: Oasis-Auth User Client")

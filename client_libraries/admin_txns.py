@@ -1,28 +1,16 @@
-###Mike: I'm going to copy this into the client libraries folder
-###      Not changing anthing here though as I don't want to break any existing references / working code.
-
 import sys
 import json
 import httpx
 
-import requests
-
 # import shell modules
 import sys
-import os
-
-# Rather than manually specify these values on everyone's environment, it probaly makes sense to use a function to get the
-# cwd/pwd/whatever we want to call it until the module has been integrated with the existing code base
-cwd = os.getcwd()
-
-sys.path.append(cwd)
 
 import config
-import streamlit as st
-import streamlit.components.v1 as components
+import config
+PWD = config.OS_PATH + config.CWD
+sys.path.append(PWD)
 
-#server_uri = 'http://localhost:8502'
-server_uri = config.API_DOMAIN
+server_uri = config.MARKETS_DOMAIN
 
 #General functions
 def create_line_item(price: str, quantity: int = 1):
