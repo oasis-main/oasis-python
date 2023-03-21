@@ -1,6 +1,3 @@
-#Page for oasis-markets demo
-import sys
-
 # import shell modules
 import sys
 import os
@@ -10,6 +7,19 @@ import os
 cwd = os.getcwd()
 sys.path.append(cwd)
 from client_libraries import admin_txns as transactions
+
+if "admin_user_id" not in st.session_state:
+    st.session_state["admin_user_id"] = None
+if "group_name" not in st.session_state:
+    st.session_state["group_name"] = None
+if "refresh_token" not in st.session_state:
+    st.session_state["refresh_token"] = None
+if "user_id" not in st.session_state:
+    st.session_state["user_id"] = None
+if "id_token" not in st.session_state:
+    st.session_state["id_token"] = None
+    if "user_email" not in st.session_state:
+        st.session_state["user_email"] = None
 
 import streamlit as st
 st.set_page_config(page_title=" Oasis-X", 
@@ -24,7 +34,7 @@ from PIL import Image
 def run():
     st.title("Oasis-Ecosystem API Demo")
     
-    st.markdown("Simple developer tools for managing data collection, process control, and machine learning applications.")
+    st.write('''The Oasis-Ecosystem is a collection of easy-to-use cloud services and apis that is designed with AI, IoT, and Data Service application developers in mind.  In as little as 3 lines of code (or using our demo interface), product and service providers can 1) create & manage groups of users 2) store, edit, and serve data 3) analyze & generate algorithmic insights 4) control access based on various fields and 5) set rules for subscribing, monitoring, and reacting to various events. We are an environmentally-conscious computing brand that allows for system-wide tracking of emissions and other resource use on a per-request basis, and open-source the parts of our platform that can be revealed without compromising user security.''')
     image = Image.open('media/welcome_image.png')
     st.image(image)
     

@@ -6,7 +6,6 @@ import httpx
 import config
 from utils import results
 
-import config
 PWD = config.OS_PATH + config.CWD
 sys.path.append(PWD)
 url = config.AUTH_DOMAIN
