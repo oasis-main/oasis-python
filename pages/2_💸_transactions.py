@@ -1,8 +1,5 @@
 #Page for oasis-markets demo
 import sys
-
-# import shell modules
-import sys
 import os
 
 
@@ -10,19 +7,50 @@ import config
 client_uri = config.CLIENT_DOMAIN
 PWD = config.OS_PATH + config.CWD
 sys.path.append(PWD)
+import streamlit as st
+st.set_page_config(page_title=" Oasis-Markets", 
+                   page_icon = 'media/icon.png', 
+                   layout = "wide")
 
 from client_libraries import admin_txns as transactions
 
-import streamlit as st
-st.set_page_config(page_title=" Oasis-Markets", 
-				   page_icon = 'media/icon.png', 
-				   layout = "wide")
+
 
 
 def run():
+    st.title('Oasis-X Markets Admin Portal')
+
+    st.write(st.session_state[''])
+    
+    #First endpoint display: /account/create
+    col_1, col_2 = st.columns(2)
+    col_1.subheader("Create Account and Account Link")
+    col_2.write("")
+    col_2.write("REST API (POST): https://markets.oasis-x.io/account/create/")
+    st.write("*Create a Stripe account object and associated Stripe account link object. These objects are created even if a user already has Stripe login credentials, with the account representing a parent object for storing information about activity on Oasis-X, and the account link being a temporary object which serves to facilitate linkage between Oasis-X and Stripe.*")
+    new_user_form = st.form("Create Stripe Account and Link")
+
+    if "user_id" not in st.session_state or \
+        "id_token" not in st.session_state or \
+        "user_email" not in st.session_state:
+        email = new_user_form.text_input("Email", disabled=True, value="Please login on the authentication page to proceed")
+    else:
+        email = new_user_form.text_input("Email", disabled=True, value=st.session_state["user_email"])
+
+    # Every form must have a submit button.
+    submitted = new_user_form.form_submit_button("Create Account Link")
+    if submitted:
+        submission = admin_txns.create_account(email, password, st.session_state["admin_user_id"], st.session_state["group_name"])
+        if submission["attempt"] == "succeeded":
+            st.success(submission["message"])
+        else:
+            st.error(submission["message"])
+
+
+
+
     prices = transactions.list_prices()
     customers = transactions.list_customers()
-    st.title('Oasis-X Markets Admin Portal')
     st.write('Prices:')
     st.dataframe(prices)
 
@@ -51,7 +79,6 @@ def run():
         'Daily': 'day'
     }
 
-    name = st.text_input('Name')
     description = st.text_input('Description')
     price = st.number_input('Price')
     interval = st.selectbox('Billing Interval',intervals.keys())
@@ -98,14 +125,7 @@ def run():
         st.markdown(link,unsafe_allow_html=True)
 
     st.subheader("Subscription Settings")
-    stripe_customers = transactions.list_customers()
-    formatted_customers = {}
-    for sc in stripe_customers:
-        key = sc.get('metadata').get('oasis_x_id') + ' - ' + sc.get('email')
-        formatted_customers[key] = sc
-    customer_list = formatted_customers.keys()
-    customer_key = st.selectbox('Customer',customer_list)
-
+    
     st.subheader("Subscribe Success")
     st.code("No content")
 

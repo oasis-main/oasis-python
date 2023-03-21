@@ -12,6 +12,18 @@ sys.path.append(PWD)
 
 server_uri = config.MARKETS_DOMAIN
 
+#User/account functions
+def create_account(oasis_x_id: str, email_addr: str):
+    path = server_uri + '/account/create/'
+    params = {
+        'oasis_x_id': oasis_x_id,
+        'email_addr': email_addr
+    }
+    response = httpx.post(path, params = params)
+    attempt_result = json.loads(response.text)
+    data = attempt_result.get('data')
+    return data
+
 #General functions
 def create_line_item(price: str, quantity: int = 1):
     return [
@@ -86,3 +98,4 @@ def create_checkout_session(price_id: str, quantity: int, mode: str, success_url
     r = httpx.post(path, params = params)
     attempt_result = json.loads(r.text) #we're going to have to parse this into a return json for each one
     return attempt_result
+
