@@ -17,19 +17,6 @@ st.set_page_config(page_title=" Oasis-Auth",
 from client_libraries import user_auth
 from utils import results
 
-if "admin_user_id" not in st.session_state:
-    st.session_state["admin_user_id"] = None
-if "group_name" not in st.session_state:
-    st.session_state["group_name"] = None
-if "refresh_token" not in st.session_state:
-    st.session_state["refresh_token"] = None
-if "user_id" not in st.session_state:
-    st.session_state["user_id"] = None
-if "id_token" not in st.session_state:
-    st.session_state["id_token"] = None
-    if "user_email" not in st.session_state:
-        st.session_state["user_email"] = None
-
 def run():
 #Page title and intro
 
@@ -162,6 +149,7 @@ login_result["data"]["refresh_token"] # api token for obtaining user sessions
     try:
         request_str = submission["url"]
         #If the above worked it means that we may have some valid values. Let's save them to session state
+        st.session_state["user_email"] = email
         st.session_state["refresh_token"] = submission["data"]["refresh_token"]
     except:
         request_str = user_auth.password_login("PLACEHOLDER", "PLACEHOLDER", "PLACEHOLDER", "PLACEHOLDER")["url"] #This should return a failure, but the URL should be intact
@@ -172,8 +160,6 @@ Then, using a https library, make an appropriate call to the endpoint. After com
         request_example.write(submission)
     except:
         request_example.write(results.response(True,True,message="This is an example response", data={"refresh_token": "placeholder_token"}, url = request_str))
-
-
 
 
 #Third endpoint display: /user/login/session
