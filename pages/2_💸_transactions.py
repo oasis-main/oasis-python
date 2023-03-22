@@ -3,14 +3,16 @@ import sys
 import os
 
 
-import config
-client_uri = config.CLIENT_DOMAIN
-PWD = config.OS_PATH + config.CWD
-sys.path.append(PWD)
 import streamlit as st
 st.set_page_config(page_title=" Oasis-Markets", 
                    page_icon = 'media/icon.png', 
                    layout = "wide")
+
+
+import config
+client_uri = config.CLIENT_DOMAIN
+PWD = config.OS_PATH + config.CWD
+sys.path.append(PWD)
 
 from client_libraries import admin_txns as transactions
 
@@ -20,7 +22,7 @@ from client_libraries import admin_txns as transactions
 def run():
     st.title('Oasis-X Markets Admin Portal')
 
-    st.write(st.session_state[''])
+    #st.write(st.session_state[''])
     
     #First endpoint display: /account/create
     col_1, col_2 = st.columns(2)

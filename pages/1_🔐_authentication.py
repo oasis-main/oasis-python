@@ -2,14 +2,16 @@
 import sys
 import os
 
-import config
-PWD = config.OS_PATH + config.CWD
-sys.path.append(PWD)
 
 import streamlit as st
 st.set_page_config(page_title=" Oasis-Auth", 
                    page_icon = 'media/icon.png', 
                    layout = "wide")
+
+import config
+PWD = config.OS_PATH + config.CWD
+sys.path.append(PWD)
+
 
 from client_libraries import user_auth
 from utils import results
@@ -20,7 +22,7 @@ def run():
     st.title("Oasis-Auth (User API)")
 
 
-    st.write(st.session_state[''])
+    #st.write(st.session_state[''])
     
     contents = st.expander("Table of Contents")
     contents.markdown("[1. Creating New Users](#create-new-user)")

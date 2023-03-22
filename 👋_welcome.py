@@ -2,6 +2,11 @@
 import sys
 import os
 
+import streamlit as st
+st.set_page_config(page_title=" Oasis-X", 
+                   page_icon = 'media/icon.png', 
+                   layout = "wide")
+
 import config
 
 client_uri = config.CLIENT_DOMAIN
@@ -21,12 +26,10 @@ if "id_token" not in st.session_state:
     if "user_email" not in st.session_state:
         st.session_state["user_email"] = None
 
-import streamlit as st
-st.set_page_config(page_title=" Oasis-X", 
-                   page_icon = 'media/icon.png', 
-                   layout = "wide")
+
 
 from client_libraries import admin_txns as transactions
+
 
 from PIL import Image
 
