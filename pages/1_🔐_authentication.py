@@ -12,6 +12,20 @@ import config
 PWD = config.OS_PATH + config.CWD
 sys.path.append(PWD)
 
+# #Set session state in case page is refreshed or user otherwise lands on it before initialization
+# if "admin_user_id" not in st.session_state:
+#     st.session_state["admin_user_id"] = None
+# if "group_name" not in st.session_state:
+#     st.session_state["group_name"] = None
+# if "refresh_token" not in st.session_state:
+#     st.session_state["refresh_token"] = None
+# if "user_id" not in st.session_state:
+#     st.session_state["user_id"] = None
+# if "id_token" not in st.session_state:
+#     st.session_state["id_token"] = None
+# if "user_email" not in st.session_state:
+#     st.session_state["user_email"] = None
+
 
 from client_libraries import user_auth
 from utils import results
