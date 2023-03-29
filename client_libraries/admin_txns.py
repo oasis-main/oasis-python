@@ -1,6 +1,7 @@
 import sys
 import json
 import httpx
+import orjson
 
 # import shell modules
 import sys
@@ -9,20 +10,35 @@ import config
 import config
 PWD = config.OS_PATH + config.CWD
 sys.path.append(PWD)
+from utils import results
 
 server_uri = config.MARKETS_DOMAIN
 
-#User/account functions
-def create_account(oasis_x_id: str, email_addr: str):
-    path = server_uri + '/account/create/'
-    params = {
-        'oasis_x_id': oasis_x_id,
-        'email_addr': email_addr
-    }
-    response = httpx.post(path, params = params)
-    attempt_result = json.loads(response.text)
-    data = attempt_result.get('data')
-    return data
+#User functions
+def create_new_user(email: str, password: str):
+    params = {"email": email, "password": password}
+    r = httpx.post(server_uri +'/user/create_account/', params = params)
+    try:
+        attempt_result = orjson.loads(r.content) #we're going to have to parse this into a return json for each one
+        attempt_result.update({"url": str(r.url)})
+        return attempt_result # The name of the return variable should tell us how to parse the resulting dictionary 
+    except:
+        return results.response(attempt=False,allowed=False,message="Could not orjson.loads the response object", url=str(r.url)) 
+
+def password_login(email: str, password: str):
+    params = {"email": email, "password": password}
+    r = httpx.post(server_uri +'/user/login/password/' , params = params)
+    try:
+        login_result = orjson.loads(r.content)
+        login_result.update({"url": str(r.url)})
+    except:
+        return results.response(attempt=False,allowed=False,message="Could not orjson.loads the response object",url=str(r.url)) 
+    
+    if return_tokens and r.status_code == httpx.codes.OK:
+        refresh_token = login_result["data"]["refresh_token"]
+        return refresh_token
+    else:
+        return login_result # The name of the return variable should tell us how to parse the resulting dictionary
 
 #General functions
 def create_line_item(price: str, quantity: int = 1):

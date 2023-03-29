@@ -40,8 +40,7 @@ def run():
     admin = st.expander("Admin Settings")
     admin_user_id="N3rLUQG4CQNxRNKZ3cBLN8Wli4v2"
     group_name="oasis-users"
-    admin.write("Default admin is set to **N3rLUQG4CQNxRNKZ3cBLN8Wli4v2** (ID for hello@oasis-x.io) with the default group as **oasis-users**.")
-    admin.write("This info is saved in the background and used in examples as the **admin_id** and **group_name** variables. You can change these variables by checking the box above and entering your own admin user id (not email!) and user group name in the form that pops up.")
+    admin.write("Admin user information should not be required for transactions demos, as transactions should function autonomously.")
     if "admin_user_id" not in st.session_state or st.session_state['admin_user_id'] == None:
         st.session_state['admin_user_id'] = admin_user_id
     if "group_name" not in st.session_state or st.session_state['group_name'] == None:
@@ -61,7 +60,7 @@ def run():
     # Every form must have a submit button.
     submitted = new_user_form.form_submit_button("Create User")
     if submitted:
-        submission = user_auth.create_new_user(email, password)
+        submission = transactions.create_new_user(email, password)
         if submission["attempt"] == "succeeded":
             st.success(submission["message"])
         else:
@@ -113,7 +112,7 @@ Then, using a https library, make an appropriate call to the endpoint. After com
     # Every form must have a submit button.
     submitted = new_user_form.form_submit_button("Login")
     if submitted:
-        submission = user_auth.password_login(email, password, st.session_state["admin_user_id"], st.session_state["group_name"])
+        submission = transactions.password_login(email, password)
         if submission["attempt"] == "succeeded":
             st.success(submission["message"])
         else:
@@ -140,7 +139,7 @@ login_result["data"]["refresh_token"] # api token for obtaining user sessions
         #If the above worked it means that we may have some valid values. Let's save them to session state
         st.session_state["user_email"] = email
         st.session_state["refresh_token"] = submission["data"]["refresh_token"]
-        user_id = admin_auth.get_user_id_by_email(st.session_state["user_email"], st.session_state["user_email"], st.session_state["admin_id_token"], st.session_state["group_name"])
+        user_id = admin_auth.get_user_id_by_email(st.session_state["user_email"], st.session_state["admin_user_id"], st.session_state["admin_id_token"], st.session_state["group_name"])
         st.session_state["user_id"] = user_id
     except:
         request_str = user_auth.password_login("PLACEHOLDER", "PLACEHOLDER", "PLACEHOLDER", "PLACEHOLDER")["url"] #This should return a failure, but the URL should be intact

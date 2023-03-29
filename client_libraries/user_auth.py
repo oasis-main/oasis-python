@@ -18,7 +18,7 @@ url=config.AUTH_DOMAIN
 def create_new_user(email: str, password: str, admin_user_id: str, group_name: str):
     params = {"email": email, "password": password, "admin_user_id": admin_user_id, "group_name": group_name}
     r = httpx.post(url +'/user/create_account/', params = params)
-    #print(r.content)
+    print(r.content)
     try:
         attempt_result = orjson.loads(r.content) #we're going to have to parse this into a return json for each one
         attempt_result.update({"url": str(r.url)})

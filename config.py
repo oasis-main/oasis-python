@@ -1,7 +1,7 @@
 CLIENT_DOMAIN='https://demo.oasis-x.io' #cloud
 #CLIENT_DOMAIN='http://localhost:8502' #local
-
-MARKETS_DOMAIN='https://markets.oasis-x.io'
+MARKETS_DOMAIN='http://0.0.0.0:8502'
+#MARKETS_DOMAIN='https://markets.oasis-x.io'
 
 AUTH_DOMAIN='https://auth.oasis-x.io'
 
