@@ -115,6 +115,12 @@ Then, using a https library, make an appropriate call to the endpoint. After com
         submission = transactions.password_login(email, password)
         if submission["attempt"] == "succeeded":
             st.success(submission["message"])
+            user_id_request = transactions.get_user_id_by_email(email)
+            if user_id_request["attempt"] == "succeeded":
+                st.success(user_id_request["message"])
+                st.session_state.user_id = user_id_request["data"]["user_id"]
+            else:
+                st.error(user_id_request["message"])
         else:
             st.error(submission["message"])
 

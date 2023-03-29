@@ -23,7 +23,7 @@ def create_new_user(email: str, password: str):
         attempt_result.update({"url": str(r.url)})
         return attempt_result # The name of the return variable should tell us how to parse the resulting dictionary 
     except:
-        return results.response(attempt=False,allowed=False,message="Could not orjson.loads the response object", url=str(r.url)) 
+        return results.response(attempt=False,allowed=False,message=r.message, url=str(r.url)) 
 
 def password_login(email: str, password: str):
     params = {"email": email, "password": password}
@@ -32,13 +32,19 @@ def password_login(email: str, password: str):
         login_result = orjson.loads(r.content)
         login_result.update({"url": str(r.url)})
     except:
-        return results.response(attempt=False,allowed=False,message="Could not orjson.loads the response object",url=str(r.url)) 
-    
-    if return_tokens and r.status_code == httpx.codes.OK:
-        refresh_token = login_result["data"]["refresh_token"]
-        return refresh_token
-    else:
-        return login_result # The name of the return variable should tell us how to parse the resulting dictionary
+        return results.response(attempt=False,allowed=False,message=r.message,url=str(r.url)) 
+    return login_result # The name of the return variable should tell us how to parse the resulting dictionary
+
+def get_user_id_by_email(email: str):
+    params = {"email": email}
+    r = httpx.get(server_uri + '/user/get/id/', params = params)
+    print(f'r:{r}')
+    try:
+        attempt_result = orjson.loads(r.content)
+        attempt_result.update({"url": str(r.url)})
+    except:
+        return results.response(attempt=False,allowed=False,message=r.message,url=str(r.url)) 
+    return attempt_result # The name of the return variable should tell us how to parse the resulting dictionary
 
 #General functions
 def create_line_item(price: str, quantity: int = 1):
