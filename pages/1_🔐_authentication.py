@@ -14,7 +14,7 @@ st.set_page_config(page_title=" Oasis-Auth",
 				   page_icon = 'media/icon.png', 
 				   layout = "wide")
 
-from client_libraries import user_auth
+from clients import user_auth
 from utils import results
 
 def run():
@@ -76,7 +76,7 @@ def run():
     #Provide a code example 
     code_example = st.expander("Code Example (Python)")
     code_example.write("Here's how to imlement this in your app using the oasis-python library:")
-    code_example.code("""from client_libraries import user_auth #Make sure the environment is set up
+    code_example.code("""from clients import user_auth #Make sure the environment is set up
 
 creation_result = user_auth.create_new_user(email, password, admin_user_id, group_name) # pings authentication server
 
@@ -133,7 +133,7 @@ Then, using a https library, make an appropriate call to the endpoint. After com
     #Provide a code example 
     code_example = st.expander("Code Example (Python)")
     code_example.write("Here's how to imlement this in your app using the oasis-python library:")
-    code_example.code("""from client_libraries import user_auth #Make sure the environment is set up
+    code_example.code("""from clients import user_auth #Make sure the environment is set up
 
 login_result = user_auth.password_login(email, password, admin_user_id, group_name) # pings authentication server
 
@@ -184,7 +184,7 @@ Then, using a https library, make an appropriate call to the endpoint. After com
     #Provide a code example 
     code_example = st.expander("Code Example (Python)")
     code_example.write("Here's how to imlement this in your app using the oasis-python library:")
-    code_example.code("""from client_libraries import user_auth #Make sure the environment is set up
+    code_example.code("""from clients import user_auth #Make sure the environment is set up
 
 session_result = user_auth.get_session(refresh_token, admin_user_id, group_name) # pings authentication server
 
@@ -247,7 +247,7 @@ Then, using a https library, make an appropriate call to the endpoint. After com
     code_example.write("Here's how to imlement this in your app using the oasis-python library:")
     code_example.code(
 """
-from client_libraries import user_auth #Make sure the environment is set up
+from clients import user_auth #Make sure the environment is set up
 verification_result = user_auth.verify_session(user_id, id_token, admin_user_id, group_name) # pings authentication server
 
 if verification_result["attempt"] == "succeeded": #make sure you are calling the correct endpoint and inspecting the right object as this is critical to security
@@ -319,7 +319,7 @@ Then, using a https library, make an appropriate call to the endpoint. After com
     code_example.write("Here's how to imlement this in your app using the oasis-python library:")
     code_example.code(
 """
-from client_libraries import user_auth #Make sure the environment is set up
+from clients import user_auth #Make sure the environment is set up
 change_result = user_auth.change_password(email, admin_user_id, group_name) # pings authentication server
 
 if change_result["attempt"] == "succeeded": #make sure you are calling the correct endpoint and inspecting the right object as this is critical to security
@@ -388,7 +388,7 @@ Then, using a https library, make an appropriate call to the endpoint. After com
     code_example.write("Here's how to imlement this in your app using the oasis-python library:")
     code_example.code(
 """
-from client_libraries import user_auth #Make sure the environment is set up
+from clients import user_auth #Make sure the environment is set up
 delete_result = user_auth.delete_user(user_id, password, admin_user_id, group_name) # pings authentication server
 
 if delete_result["attempt"] == "succeeded": #make sure you are calling the correct endpoint and inspecting the right object as this is critical to security

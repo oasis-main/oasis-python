@@ -11,7 +11,7 @@ client_uri = config.CLIENT_DOMAIN
 PWD = config.OS_PATH + config.CWD
 sys.path.append(PWD)
 
-from client_libraries import admin_txns as transactions
+from clients import admin_txns as transactions
 
 import streamlit as st
 st.set_page_config(page_title=" Oasis-Markets", 

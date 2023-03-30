@@ -2,20 +2,23 @@
 #for managing groups of users
 import time
 import sys
+import os
 import orjson
 import httpx
 from datetime import datetime
 
-from typing import Literal, Dict, Any
-
+cwd = os.getcwd()
+sys.path.append(cwd)
 import config
 PWD = config.OS_PATH + config.CWD
 sys.path.append(PWD)
 
-from client_libraries import user_auth
+from typing import Dict, Any
+
+from clients import user_auth
 from utils import results
 
-url = config.AUTH_DOMAIN
+url=config.URL
 
 def create_admin_account(admin_email: str, admin_password: str):
     params = {"admin_email": admin_email, "admin_password": admin_password}
@@ -119,9 +122,31 @@ def get_group_users(admin_user_id: str, admin_id_token: str, group_name: str, re
     else:
         return result 
 
+def get_user_id_by_email(user_email: str, admin_user_id: str, admin_id_token: str, group_name: str):
+    params = {"user_email": user_email, "admin_user_id": admin_user_id, "admin_id_token": admin_id_token, "group_name": group_name}
+    r = httpx.get(url +'/admin/get_uid_by_email/', params = params)
+    try:
+        user_id_result = orjson.loads(r.content)
+        user_id_result.update({"url": str(r.url)})
+        #print(user_id_result)
+    except:
+        return results.response(attempt=False,allowed=False,message="Could not orjson.loads the response object",url=str(r.url)) 
+    return user_id_result
+
+def get_user_email(user_id: str, admin_user_id: str, admin_id_token: str, group_name: str):
+    params = {"user_id": user_id, "admin_user_id": admin_user_id, "admin_id_token": admin_id_token, "group_name": group_name}
+    r = httpx.get(url +'/admin/get_email_by_uid/', params = params)
+    try:
+        user_email_result = orjson.loads(r.content)
+        user_email_result.update({"url": str(r.url)})
+        #print(user_email_result)
+    except:
+        return results.response(attempt=False,allowed=False,message="Could not orjson.loads the response object",url=str(r.url)) 
+    return user_email_result
+
 def read_user_metadata(admin_user_id: str, admin_id_token: str, user_id: str, group: str):
     params = {"admin_user_id": admin_user_id, "admin_id_token": admin_id_token, "user_id": user_id, "group": group}
-    r = httpx.get(url +'/admin/read_user/', params = params)
+    r = httpx.get(url +'/admin/read_user_metadata/', params = params)
     try:
         result = orjson.loads(r.content) 
         result.update({"url": str(r.url)})
@@ -129,22 +154,12 @@ def read_user_metadata(admin_user_id: str, admin_id_token: str, user_id: str, gr
     except:
         return results.response(attempt=False, allowed=False, message = "Could not orjson.loads the response object",url=str(r.url))
 
-def write_user_metadata(admin_user_id: str, admin_id_token: str, user_id: str, group: str, dictionary: Dict[str, Any]): #all dicts passed to fastapi over HTTP must be byte representations
-    params = {"admin_user_id": admin_user_id, "admin_id_token": admin_id_token, "user_id": user_id, "group": group, "dictionary": orjson.dumps(dictionary)} #make sure to serialize the calling object, wherever it is
-    r = httpx.post(url +'/admin/write_user/', params = params)
+def write_user_metadata(admin_user_id: str, admin_id_token: str, user_id: str, group: str, dictionary: Dict[str, Any]): #all dicts passed to fastapi over HTTP must be string representations
+    params = {"admin_user_id": admin_user_id, "admin_id_token": admin_id_token, "user_id": user_id, "group": group, "dictionary": orjson.dumps(dictionary)}
+    r = httpx.post(url +'/admin/write_user_metadata/', params = params)
     #print(r)
     #print(r.content)
     #print(r.url)
-    try:
-        result = orjson.loads(r.content) 
-        result.update({"url": str(r.url)})
-        return result 
-    except:
-        return results.response(attempt=False, allowed=False, message = "Could not orjson.loads the response object",url=str(r.url))
-
-def request_user_access(admin_user_id: str, admin_id_token: str, user_id: str, group: str, data_type: Literal["allowance_count","credit_balance","clearance_code"], field: str, required: str, emissions_kg: float = 0.0000, check_only: bool = False):
-    params = {"admin_user_id": admin_user_id, "admin_id_token": admin_id_token, "user_id": user_id, "group": group, "data_type": data_type, "field": field, "required": required, "emissions_kg": emissions_kg, "check_only": check_only}
-    r = httpx.post(url +'/admin/user_access_request/', params = params)
     try:
         result = orjson.loads(r.content) 
         result.update({"url": str(r.url)})
@@ -240,24 +255,13 @@ if __name__ == "__main__":
         print("Testing verification of admin session w/ local credentials...")
         print(verify_admin_session(admin_user_id, admin_id_token))
         print("Success")
-        print("Testing user access allowances...")
+
         user_email = "leemichael289@gmail.com"#input("Provide a test-user email address: ")
         user_pass = "insecurepassword"#input("Provide a test-user password: ")
         print(user_auth.password_login(email=user_email, password=user_pass, admin_user_id="N3rLUQG4CQNxRNKZ3cBLN8Wli4v2", group_name="oasis-users"))
         user_token = user_auth.password_login(email=user_email, password=user_pass, admin_user_id="N3rLUQG4CQNxRNKZ3cBLN8Wli4v2", group_name="oasis-users", return_tokens=True)
-        user_id, id_token = user_auth.get_session(user_token, admin_user_id="N3rLUQG4CQNxRNKZ3cBLN8Wli4v2", group_name="oasis-users", return_tokens=True) 
-        #Should succeed
-        print(request_user_access(admin_user_id, admin_id_token, user_id, group="oasis-users", data_type = "allowance_count", field = "new_devices_remaining", required = 1))
-        #Should succeed
-        print(request_user_access(admin_user_id, admin_id_token, user_id, group="oasis-users", data_type = "credit_balance", field ="database_gb_usage_remaining", required = 0.01))
-        #Should succeed
-        print(request_user_access(admin_user_id, admin_id_token, user_id, group="oasis-users", data_type = "clearance_code", field ="data_plan", required = "community"))
-        #Should fail
-        print(request_user_access(admin_user_id, admin_id_token, user_id, group="oasis-users", data_type = "allowance_count", field ="knowledge_ai_training_tokens", required = 1, check_only=True))
-        #Should fail
-        print(request_user_access(admin_user_id, admin_id_token, user_id, group="oasis-users", data_type = "credit_balance", field ="database_gb_usage_remaining", required = 1.00, check_only=True))
-        #Should fail
-        print(request_user_access(admin_user_id, admin_id_token, user_id, group="oasis-users", data_type = "clearance_code", field ="data_plan", required = "standard"))
+        user_id, id_token = user_auth.get_session(user_token, admin_user_id="N3rLUQG4CQNxRNKZ3cBLN8Wli4v2", group_name="oasis-users", return_tokens=True)
+
         print("Testing read & write:")
         #Should succeed and return a user object
         print(read_user_metadata(admin_user_id, admin_id_token, user_id, "oasis-users"))
@@ -276,7 +280,7 @@ if __name__ == "__main__":
         print("Success")
         print("Testing admin create & delete password...")
         user_email = input("Provide a test-user email address: ")
-        user = firebase.admin_auth.get_user_by_email(user_email)
+        user = firebase.admin_auth.get_user_by_email(user_email) #We now expose our own endpoint for this
         print(admin_delete_user(admin_user_id, admin_id_token, user.uid, "oasis-users"))
     
     #create and delete a group with additional parameters
@@ -336,3 +340,22 @@ if __name__ == "__main__":
 
         print("Testing admin deletion...") #should take the created test-group with it
         print(delete_admin_account(admin_user_email, admin_user_pass))
+
+    if sys.argv[1] == "test_get_info":
+        admin_refresh_token = admin_login(admin_email="hello@oasis-x.io", admin_password=admin_pass, return_tokens=True)
+        print("Success.")
+        print("Testing retreival of admin session w/ refresh token...")
+        admin_user_id, admin_id_token = get_admin_session(admin_refresh_token, return_tokens=True)
+        
+        user_email = "leemichael289@gmail.com"
+
+        print("Testing get_user_id_by_email...")
+        result = get_user_id_by_email(user_email, admin_user_id, admin_id_token, "oasis-users")
+        user_id = result["data"]["user_id"]
+        print("User-Identifying String:" + user_id)
+
+        print("Testing get user email...")
+        result = get_user_email(user_id, admin_user_id, admin_id_token, "oasis-users")
+        user_email = result["data"]["user_email"]
+        print("User Email:" + user_email)
+

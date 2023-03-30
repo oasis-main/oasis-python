@@ -6,7 +6,7 @@ import os
 # cwd/pwd/whatever we want to call it until the module has been integrated with the existing code base
 cwd = os.getcwd()
 sys.path.append(cwd)
-from client_libraries import admin_txns as transactions
+from clients import admin_txns as transactions
 
 if "admin_user_id" not in st.session_state:
     st.session_state["admin_user_id"] = None
@@ -59,14 +59,14 @@ cd oasis-python
 
     col1.write("This allows API usage from any python interpreter, like so:")
     
-    col1.code('''from client_libraries import user_auth, user_txns
+    col1.code('''from clients import user_auth, user_txns
 user_auth.create_new_user(email, password, admin_id, group_name)''', language='python')
     
     col1.write("To call from a different directory than the library itself, have the importing script execute this line first:")
     
     col1.code('''import sys
 sys.path.append("/path/you/git/cloned/into/oasis-python")
-from client_libraries import user_auth''', language = 'python')
+from clients import user_auth''', language = 'python')
 
     col1.write("You may also make REST API calls to the various services, documented at: ")
     col1.code('''https://auth.oasis-x.io/docs
