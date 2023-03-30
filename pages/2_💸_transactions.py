@@ -106,7 +106,7 @@ Then, using a https library, make an appropriate call to the endpoint. After com
     st.write("*Submit a valid username and password to get a refresh token, which is can be used to obtain a temporary user session*")
     new_user_form = st.form("Login")
 
-    email = new_user_form.text_input("Email", help="You'll have to verify this before logging in.", value = st.session_state["user_email"])
+    email = new_user_form.text_input("Email", help="You'll have to verify this before logging in.")
     password = new_user_form.text_input("Password", type="password")
 
     # Every form must have a submit button.
@@ -157,23 +157,46 @@ Then, using a https library, make an appropriate call to the endpoint. After com
     except:
         request_example.write(results.response(True,True,message="This is an example response", data={"refresh_token": "placeholder_token"}, url = request_str))
 
-    
-    #First endpoint display: /account/create
+    #Third endpoint display: /customer/create
     col_1, col_2 = st.columns(2)
-    col_1.subheader("Create Account and Account Link")
+    col_1.subheader("Create Stripe Customer")
+    col_2.write("")
+    col_2.write("REST API (POST): https://markets.oasis-x.io/account/create/")
+    st.write("*Create a Stripe Customer object for the logged in user. Customers represent users who will be charged by Oasis-X.*")
+    new_customer_form = st.form("Create Stripe Customer")
+    # if "user_id" not in st.session_state or st.session_state.user_id == None or \
+    #     "user_email" not in st.session_state or st.session_state.user_email == None:
+    #     email = new_user_form.text_input("Email", disabled=True, value="Please login on the authentication page to proceed")
+    # else:
+    name = new_customer_form.text_input("Name")
+    email = new_customer_form.text_input("Email", disabled=True, value=st.session_state["user_email"])
+    user_id = new_customer_form.text_input("Oasis-X User ID", disabled=True, value=st.session_state["user_id"])
+    submitted = new_customer_form.form_submit_button("Create Customer")
+    if submitted:
+        submission = transactions.create_customer(user_id, email, name)
+        #Need to add attempt/allowed/message pattern to transactions api responses
+        print(f"account creation submission:{submission}")
+        if submission and submission["id"]:
+            stripe_customer_id = submission["id"]
+            st.success(stripe_link)
+        else:
+            st.error(submission)
+    
+    #Fourth endpoint display: /account/create
+    col_1, col_2 = st.columns(2)
+    col_1.subheader("Create Stripe Account and Account Link")
     col_2.write("")
     col_2.write("REST API (POST): https://markets.oasis-x.io/account/create/")
     st.write("*Create a Stripe account object and associated Stripe account link object. These objects are created even if a user already has Stripe login credentials, with the account representing a parent object for storing information about activity on Oasis-X, and the account link being a temporary object which serves to facilitate linkage between Oasis-X and Stripe.*")
+    st.write("*Accounts are only required for users which will receive payments, e.g. in a user-to-user marketplace transaction.*")
     new_user_form = st.form("Create Stripe Account and Link")
-
     # if "user_id" not in st.session_state or st.session_state.user_id == None or \
     #     "user_email" not in st.session_state or st.session_state.user_email == None:
     #     email = new_user_form.text_input("Email", disabled=True, value="Please login on the authentication page to proceed")
     # else:
     email = new_user_form.text_input("Email", disabled=True, value=st.session_state["user_email"])
     user_id = new_user_form.text_input("Oasis-X User ID", disabled=True, value=st.session_state["user_id"])
-
-        # Every form must have a submit button.
+    # Every form must have a submit button.
     submitted = new_user_form.form_submit_button("Create Account Link")
     if submitted:
         submission = transactions.create_stripe_account(email,user_id)
@@ -183,9 +206,7 @@ Then, using a https library, make an appropriate call to the endpoint. After com
             stripe_link = submission["redirect_url"]
             st.success(stripe_link)
         else:
-            st.error("Account creation failed: {submission}")
-
-
+            st.error(submission)
 
 
     prices = transactions.list_prices()
@@ -195,18 +216,6 @@ Then, using a https library, make an appropriate call to the endpoint. After com
 
     st.write('Customers:')
     st.dataframe(customers)
-
-
-    st.subheader('Add New Customer')
-
-    name = st.text_input('Name')
-    oasis_x_id = st.text_input('Oasis-X Id')
-    email_addr = st.text_input('Email Address')
-    
-    if st.button('Create Customer'):
-        #Stripe unit amounts are specified in cents, and are best passed as integers
-        new_customer = transactions.create_customer(oasis_x_id, email_addr, name)
-        print(f'{new_customer}')
 
 
     st.subheader('Add New Oasis-X Subscription Product')

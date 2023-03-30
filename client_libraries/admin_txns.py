@@ -33,7 +33,7 @@ def password_login(email: str, password: str):
         login_result.update({"url": str(r.url)})
     except:
         return results.response(attempt=False,allowed=False,message=r.message,url=str(r.url)) 
-    return login_result # The name of the return variable should tell us how to parse the resulting dictionary
+    return login_result
 
 def get_user_id_by_email(email: str):
     params = {"email": email}
@@ -43,9 +43,49 @@ def get_user_id_by_email(email: str):
         attempt_result.update({"url": str(r.url)})
     except:
         return results.response(attempt=False,allowed=False,message=r.message,url=str(r.url)) 
-    return attempt_result # The name of the return variable should tell us how to parse the resulting dictionary
+    return attempt_result
 
-#Stripe functions
+def read_user_metadata(oasis_x_id: str):
+    params = {"oasis_x_id": oasis_x_id}
+    r = httpx.get(server_uri + '/user/read/metadata', params = params)
+    try:
+        attempt_result = orjson.loads(r.content)
+        attempt_result.update({"url": str(r.url)})
+    except:
+        return results.response(attempt=False,allowed=False,message=r.message,url=str(r.url)) 
+    return attempt_result
+
+def write_user_metadata(oasis_x_id: str):
+    params = {"oasis_x_id": oasis_x_id}
+    r = httpx.get(server_uri + '/user/read/metadata', params = params)
+    try:
+        attempt_result = orjson.loads(r.content)
+        attempt_result.update({"url": str(r.url)})
+    except:
+        return results.response(attempt=False,allowed=False,message=r.message,url=str(r.url)) 
+    return attempt_result
+
+#Customer functions
+def list_customers():
+    path = server_uri + '/customer/list/'
+    response = httpx.get(path)
+    attempt_result = json.loads(response.text)
+    data = attempt_result.get('data')
+    return data
+
+def create_customer(oasis_x_id: str, email: str, name: str):
+    path = server_uri + '/customer/create/'
+    params = {
+        'email_addr': email,
+        'oasis_x_id': oasis_x_id,
+        'name': name
+    }
+    response = httpx.post(path, params = params)
+    attempt_result = json.loads(response.text)
+    data = attempt_result.get('data')
+    return data
+
+#Reseller functions
 def create_stripe_account(email: str, oasis_x_id: str):
     params = {"email": email, "oasis_x_id": oasis_x_id}
     r = httpx.post(server_uri + '/account/create/', params = params, timeout=10.0)
@@ -95,27 +135,6 @@ def list_products():
 def list_prices():
     path = server_uri + '/price/list/'
     response = httpx.get(path)
-    attempt_result = json.loads(response.text)
-    data = attempt_result.get('data')
-    return data
-
-#Customer functions
-
-def list_customers():
-    path = server_uri + '/customer/list/'
-    response = httpx.get(path)
-    attempt_result = json.loads(response.text)
-    data = attempt_result.get('data')
-    return data
-
-def create_customer(oasis_x_id: str, email_addr: str, name: str):
-    path = server_uri + '/customer/create/'
-    params = {
-        'email_addr': email_addr,
-        'oasis_x_id': oasis_x_id,
-        'name': name
-    }
-    response = httpx.post(path, params = params)
     attempt_result = json.loads(response.text)
     data = attempt_result.get('data')
     return data
