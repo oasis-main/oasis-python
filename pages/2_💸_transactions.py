@@ -14,9 +14,9 @@ client_uri = config.CLIENT_DOMAIN
 PWD = config.OS_PATH + config.CWD
 sys.path.append(PWD)
 
-from client_libraries import admin_txns as transactions
-from client_libraries import admin_auth as admin_auth
-from client_libraries import user_auth as user_auth
+from clients import admin_txns
+from clients import admin_auth
+from clients import user_auth
 from utils import results
 
 #Set session state in case page is refreshed or user otherwise lands on it before initialization
@@ -60,7 +60,7 @@ def run():
     # Every form must have a submit button.
     submitted = new_user_form.form_submit_button("Create User")
     if submitted:
-        submission = transactions.create_new_user(email, password)
+        submission = admin_txns.create_new_user(email, password)
         if submission["attempt"] == "succeeded":
             st.success(submission["message"])
         else:
@@ -112,10 +112,10 @@ Then, using a https library, make an appropriate call to the endpoint. After com
     # Every form must have a submit button.
     submitted = new_user_form.form_submit_button("Login")
     if submitted:
-        submission = transactions.password_login(email, password)
+        submission = admin_txns.password_login(email, password)
         if submission["attempt"] == "succeeded":
             st.success(submission["message"])
-            user_id_request = transactions.get_user_id_by_email(email)
+            user_id_request = admin_txns.get_user_id_by_email(email)
             if user_id_request["attempt"] == "succeeded":
                 st.success(user_id_request["message"])
                 st.session_state.user_id = user_id_request["data"]["user_id"]
@@ -173,7 +173,7 @@ Then, using a https library, make an appropriate call to the endpoint. After com
     user_id = new_customer_form.text_input("Oasis-X User ID", disabled=True, value=st.session_state["user_id"])
     submitted = new_customer_form.form_submit_button("Create Customer")
     if submitted:
-        submission = transactions.create_customer(user_id, email, name)
+        submission = admin_txns.create_customer(user_id, email, name)
         #Need to add attempt/allowed/message pattern to transactions api responses
         print(f"account creation submission:{submission}")
         if submission and submission["id"]:
@@ -199,7 +199,7 @@ Then, using a https library, make an appropriate call to the endpoint. After com
     # Every form must have a submit button.
     submitted = new_user_form.form_submit_button("Create Account Link")
     if submitted:
-        submission = transactions.create_stripe_account(email,user_id)
+        submission = admin_txns.create_stripe_account(email,user_id)
         #Need to add attempt/allowed/message pattern to transactions api responses
         print(f"account creation submission:{submission}")
         if submission and submission["redirect_url"]:
@@ -209,8 +209,8 @@ Then, using a https library, make an appropriate call to the endpoint. After com
             st.error(submission)
 
 
-    prices = transactions.list_prices()
-    customers = transactions.list_customers()
+    prices = admin_txns.list_prices()
+    customers = admin_txns.list_customers()
     st.write('Prices:')
     st.dataframe(prices)
 
@@ -234,17 +234,17 @@ Then, using a https library, make an appropriate call to the endpoint. After com
     if st.button('Create Product'):
         #Stripe unit amounts are specified in cents, and are best passed as integers
         unit_amount = int(price * 100)
-        new_product = transactions.create_product(unit_amount, name, description, intervals.get(interval))
+        new_product = admin_txns.create_product(unit_amount, name, description, intervals.get(interval))
 
     st.subheader('Add New Subscription')
-    stripe_prices = transactions.list_prices()
+    stripe_prices = admin_txns.list_prices()
     formatted_prices = {}
     for sp in stripe_prices:
         key = sp.get('product').get('name') + ' - $' + str(sp.get('unit_amount') / 100) + '0/' + sp.get('recurring').get('interval')
         formatted_prices[key] = sp
     price_list = formatted_prices.keys()
 
-    stripe_customers = transactions.list_customers()
+    stripe_customers = admin_txns.list_customers()
     formatted_customers = {}
     for sc in stripe_customers:
         key = sc.get('metadata').get('oasis_x_id') + ' - ' + sc.get('email')
@@ -257,16 +257,16 @@ Then, using a https library, make an appropriate call to the endpoint. After com
     
     if st.button('Checkout'):
         #Stripe unit amounts are specified in cents, and are best passed as integers
-        # new_customer = transactions.create_subscription(oasis_x_id, email_addr, name)
+        # new_customer = admin_txns.create_subscription(oasis_x_id, email_addr, name)
         customer = formatted_customers.get(customer_key)
         customer_id = customer['id']
         price = formatted_prices.get(price_key)
         price_id = price['id']
-        items = transactions.create_line_item(price_id)
+        items = admin_txns.create_line_item(price_id)
         mode = 'subscription'
         success_url = client_uri + '/success'
         cancel_url = client_uri + '/cancel'
-        checkout_session = transactions.create_checkout_session(price_id, 1, mode, success_url, cancel_url)
+        checkout_session = admin_txns.create_checkout_session(price_id, 1, mode, success_url, cancel_url)
         print(f'checkout_session: {checkout_session}')
         
         link='Complete checkout [here](' + checkout_session.get('url') + ')'

@@ -1,18 +1,20 @@
 
+#Paths
 import sys
-import os
-
-import streamlit as st
-st.set_page_config(page_title=" Oasis-X", 
-                   page_icon = 'media/icon.png', 
-                   layout = "wide")
-
 import config
 
 client_uri = config.CLIENT_DOMAIN
 PWD = config.OS_PATH + config.CWD
 sys.path.append(PWD)
 
+#Python Packages
+from PIL import Image
+import streamlit as st
+
+#Initialize Streamlit
+st.set_page_config(page_title=" Oasis-X", 
+                   page_icon = 'media/icon.png', 
+                   layout = "wide")
 if "admin_user_id" not in st.session_state:
     st.session_state["admin_user_id"] = None
 if "group_name" not in st.session_state:
@@ -27,11 +29,6 @@ if "id_token" not in st.session_state:
         st.session_state["user_email"] = None
 
 
-
-from client_libraries import admin_txns as transactions
-
-
-from PIL import Image
 
 def run():
     st.title("Oasis-Ecosystem API Demo")
@@ -61,14 +58,14 @@ cd oasis-python
 
     col1.write("This allows API usage from any python interpreter, like so:")
     
-    col1.code('''from client_libraries import user_auth, user_txns
+    col1.code('''from clients import user_auth, user_txns
 user_auth.create_new_user(email, password, admin_id, group_name)''', language='python')
     
     col1.write("To call from a different directory than the library itself, have the importing script execute this line first:")
     
     col1.code('''import sys
 sys.path.append("/path/you/git/cloned/into/oasis-python")
-from client_libraries import user_auth''', language = 'python')
+from clients import user_auth''', language = 'python')
 
     col1.write("You may also make REST API calls to the various services, documented at: ")
     col1.code('''https://auth.oasis-x.io/docs
