@@ -13,7 +13,7 @@ sys.path.append(PWD)
 from utils import results
 from typing import Literal, Optional
 
-url=config.URL
+url=config.AUTH_DOMAIN
 
 def create_new_user(email: str, password: str, admin_user_id: str, group_name: str):
     params = {"email": email, "password": password, "admin_user_id": admin_user_id, "group_name": group_name}
