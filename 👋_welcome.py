@@ -25,8 +25,8 @@ if "user_id" not in st.session_state:
     st.session_state["user_id"] = None
 if "id_token" not in st.session_state:
     st.session_state["id_token"] = None
-    if "user_email" not in st.session_state:
-        st.session_state["user_email"] = None
+if "user_email" not in st.session_state:
+    st.session_state["user_email"] = None
 
 
 
