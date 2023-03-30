@@ -1,18 +1,31 @@
 #Page for oasis-auth demo
 import sys
+import os
 
-# import shell modules
-import sys
 
 import streamlit as st
+st.set_page_config(page_title=" Oasis-Auth", 
+                   page_icon = 'media/icon.png', 
+                   layout = "wide")
+
 import config
 PWD = config.OS_PATH + config.CWD
 sys.path.append(PWD)
 
+# #Set session state in case page is refreshed or user otherwise lands on it before initialization
+# if "admin_user_id" not in st.session_state:
+#     st.session_state["admin_user_id"] = None
+# if "group_name" not in st.session_state:
+#     st.session_state["group_name"] = None
+# if "refresh_token" not in st.session_state:
+#     st.session_state["refresh_token"] = None
+# if "user_id" not in st.session_state:
+#     st.session_state["user_id"] = None
+# if "id_token" not in st.session_state:
+#     st.session_state["id_token"] = None
+# if "user_email" not in st.session_state:
+#     st.session_state["user_email"] = None
 
-st.set_page_config(page_title=" Oasis-Auth", 
-				   page_icon = 'media/icon.png', 
-				   layout = "wide")
 
 from client_libraries import user_auth
 from utils import results
@@ -21,6 +34,9 @@ def run():
 #Page title and intro
 
     st.title("Oasis-Auth (User API)")
+
+
+    #st.write(st.session_state[''])
     
     contents = st.expander("Table of Contents")
     contents.markdown("[1. Creating New Users](#create-new-user)")

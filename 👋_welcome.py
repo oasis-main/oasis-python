@@ -1,12 +1,17 @@
-# import shell modules
+
 import sys
 import os
 
-# Rather than manually specify these values on everyone's environment, it probaly makes sense to use a function to get the
-# cwd/pwd/whatever we want to call it until the module has been integrated with the existing code base
-cwd = os.getcwd()
-sys.path.append(cwd)
-from client_libraries import admin_txns as transactions
+import streamlit as st
+st.set_page_config(page_title=" Oasis-X", 
+                   page_icon = 'media/icon.png', 
+                   layout = "wide")
+
+import config
+
+client_uri = config.CLIENT_DOMAIN
+PWD = config.OS_PATH + config.CWD
+sys.path.append(PWD)
 
 if "admin_user_id" not in st.session_state:
     st.session_state["admin_user_id"] = None
@@ -21,13 +26,10 @@ if "id_token" not in st.session_state:
     if "user_email" not in st.session_state:
         st.session_state["user_email"] = None
 
-import streamlit as st
-st.set_page_config(page_title=" Oasis-X", 
-				   page_icon = 'media/icon.png', 
-				   layout = "wide")
 
-import config
-client_uri = config.CLIENT_DOMAIN
+
+from client_libraries import admin_txns as transactions
+
 
 from PIL import Image
 
