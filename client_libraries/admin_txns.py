@@ -14,7 +14,7 @@ from utils import results
 
 server_uri = config.MARKETS_DOMAIN
 
-#User functions
+#User/auth functions
 def create_new_user(email: str, password: str):
     params = {"email": email, "password": password}
     r = httpx.post(server_uri +'/user/create_account/', params = params)
@@ -38,13 +38,28 @@ def password_login(email: str, password: str):
 def get_user_id_by_email(email: str):
     params = {"email": email}
     r = httpx.get(server_uri + '/user/get/id/', params = params)
-    print(f'r:{r}')
     try:
         attempt_result = orjson.loads(r.content)
         attempt_result.update({"url": str(r.url)})
     except:
         return results.response(attempt=False,allowed=False,message=r.message,url=str(r.url)) 
     return attempt_result # The name of the return variable should tell us how to parse the resulting dictionary
+
+#Stripe functions
+def create_stripe_account(email: str, oasis_x_id: str):
+    params = {"email": email, "oasis_x_id": oasis_x_id}
+    r = httpx.post(server_uri + '/account/create/', params = params, timeout=10.0)
+    print(f"create_stripe_account r: {r}")
+    try:
+        attempt_result = orjson.loads(r.content)
+        #  Response from account creation server includes a url field to
+        #  direct user to complete account creation on Stripe, so this must
+        #  be stored in a separate field
+        attempt_result.update({"redirect_url": attempt_result["url"]})
+        attempt_result.update({"url": str(r.url)})
+    except:
+        return results.response(attempt=False,allowed=False,message=r.message,url=str(r.url)) 
+    return attempt_result
 
 #General functions
 def create_line_item(price: str, quantity: int = 1):

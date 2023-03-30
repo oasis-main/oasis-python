@@ -176,11 +176,14 @@ Then, using a https library, make an appropriate call to the endpoint. After com
         # Every form must have a submit button.
     submitted = new_user_form.form_submit_button("Create Account Link")
     if submitted:
-        submission = transactions.create_account(email,user_id)
-        if submission["attempt"] == "succeeded":
-            st.success(submission)
+        submission = transactions.create_stripe_account(email,user_id)
+        #Need to add attempt/allowed/message pattern to transactions api responses
+        print(f"account creation submission:{submission}")
+        if submission and submission["redirect_url"]:
+            stripe_link = submission["redirect_url"]
+            st.success(stripe_link)
         else:
-            st.error(submission["message"])
+            st.error("Account creation failed: {submission}")
 
 
 
