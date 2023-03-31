@@ -28,7 +28,7 @@ if "id_token" not in st.session_state:
 
 
 
-from client_libraries import admin_txns as transactions
+from clients import admin_txns as transactions
 
 
 from PIL import Image

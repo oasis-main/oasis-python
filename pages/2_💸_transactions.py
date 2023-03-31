@@ -14,9 +14,9 @@ client_uri = config.CLIENT_DOMAIN
 PWD = config.OS_PATH + config.CWD
 sys.path.append(PWD)
 
-from client_libraries import admin_txns as transactions
-from client_libraries import admin_auth as admin_auth
-from client_libraries import user_auth as user_auth
+from clients import admin_txns as transactions
+from clients import admin_auth as admin_auth
+from clients import user_auth as user_auth
 from utils import results
 
 #Set session state in case page is refreshed or user otherwise lands on it before initialization
@@ -69,7 +69,7 @@ def run():
     #Provide a code example 
     code_example = st.expander("Code Example (Python)")
     code_example.write("Here's how to imlement this in your app using the oasis-python library:")
-    code_example.code("""from client_libraries import user_auth #Make sure the environment is set up
+    code_example.code("""from clients import user_auth #Make sure the environment is set up
 
 creation_result = user_auth.create_new_user(email, password, admin_user_id, group_name) # pings authentication server
 
@@ -114,20 +114,27 @@ Then, using a https library, make an appropriate call to the endpoint. After com
     if submitted:
         submission = transactions.password_login(email, password)
         if submission["attempt"] == "succeeded":
+            #   this is currently down
             st.success(submission["message"])
-            user_id_request = transactions.get_user_id_by_email(email)
-            if user_id_request["attempt"] == "succeeded":
-                st.success(user_id_request["message"])
-                st.session_state.user_id = user_id_request["data"]["user_id"]
-            else:
-                st.error(user_id_request["message"])
+            # user_id_request = transactions.get_user_id_by_email(email)
+            # if user_id_request["attempt"] == "succeeded":
+            #     st.success(user_id_request["message"])
+            #     st.session_state.user_id = user_id_request["data"]["user_id"]
+            #     metadata_request = transactions.get_user_metadata(st.session_state.user_id)
+            #     if metadata_request["attempt"] == "succeeded":
+            #         st.success(metadata_request["message"])
+            #         st.session_state.user_metadata = metadata_request["data"]
+            #     else:
+            #         st.error(user_id_request["message"])
+            # else:
+            #     st.error(user_id_request["message"])
         else:
             st.error(submission["message"])
 
     #Provide a code example 
     code_example = st.expander("Code Example (Python)")
     code_example.write("Here's how to imlement this in your app using the oasis-python library:")
-    code_example.code("""from client_libraries import user_auth #Make sure the environment is set up
+    code_example.code("""from clients import user_auth #Make sure the environment is set up
 
 login_result = user_auth.password_login(email, password, admin_user_id, group_name) # pings authentication server
 
@@ -178,7 +185,7 @@ Then, using a https library, make an appropriate call to the endpoint. After com
         print(f"account creation submission:{submission}")
         if submission and submission["id"]:
             stripe_customer_id = submission["id"]
-            st.success(stripe_link)
+            st.success(submission)
         else:
             st.error(submission)
     
@@ -187,7 +194,8 @@ Then, using a https library, make an appropriate call to the endpoint. After com
     col_1.subheader("Create Stripe Account and Account Link")
     col_2.write("")
     col_2.write("REST API (POST): https://markets.oasis-x.io/account/create/")
-    st.write("*Create a Stripe account object and associated Stripe account link object. These objects are created even if a user already has Stripe login credentials, with the account representing a parent object for storing information about activity on Oasis-X, and the account link being a temporary object which serves to facilitate linkage between Oasis-X and Stripe.*")
+    st.write("*Create a Stripe account object and associated Stripe account link object.*")
+    st.write("*These objects are created even if a user already has Stripe login credentials, with the account representing a parent object for storing information about activity on Oasis-X, and the account link being a temporary object which serves to facilitate linkage between Oasis-X and Stripe.*")
     st.write("*Accounts are only required for users which will receive payments, e.g. in a user-to-user marketplace transaction.*")
     new_user_form = st.form("Create Stripe Account and Link")
     # if "user_id" not in st.session_state or st.session_state.user_id == None or \
