@@ -21,17 +21,23 @@ from utils import results
 
 #Set session state in case page is refreshed or user otherwise lands on it before initialization
 if "admin_user_id" not in st.session_state:
-    st.session_state["admin_user_id"] = None
+    st.session_state["admin_user_id"] = ""
 if "group_name" not in st.session_state:
-    st.session_state["group_name"] = None
+    st.session_state["group_name"] = ""
 if "refresh_token" not in st.session_state:
-    st.session_state["refresh_token"] = None
+    st.session_state["refresh_token"] = ""
 if "user_id" not in st.session_state:
-    st.session_state["user_id"] = None
+    st.session_state["user_id"] = ""
 if "id_token" not in st.session_state:
-    st.session_state["id_token"] = None
+    st.session_state["id_token"] = ""
 if "user_email" not in st.session_state:
-    st.session_state["user_email"] = None
+    st.session_state["user_email"] = ""
+if "metadata" not in st.session_state:
+    st.session_state["metadata"] = {
+        "customer_id": ""
+    }
+if "customer" not in st.session_state:
+    st.session_state["customer"] = {}
 
 def run():
     st.title('Oasis-X Markets Admin Portal')
@@ -105,29 +111,32 @@ Then, using a https library, make an appropriate call to the endpoint. After com
     col_2.write("REST API (POST): https://auth.oasis-x.io/user/login/password/")
     st.write("*Submit a valid username and password to get a refresh token, which is can be used to obtain a temporary user session*")
     new_user_form = st.form("Login")
-
     email = new_user_form.text_input("Email", help="You'll have to verify this before logging in.")
     password = new_user_form.text_input("Password", type="password")
-
-    # Every form must have a submit button.
     submitted = new_user_form.form_submit_button("Login")
     if submitted:
         submission = transactions.password_login(email, password)
         if submission["attempt"] == "succeeded":
-            #   this is currently down
             st.success(submission["message"])
-            # user_id_request = transactions.get_user_id_by_email(email)
-            # if user_id_request["attempt"] == "succeeded":
-            #     st.success(user_id_request["message"])
-            #     st.session_state.user_id = user_id_request["data"]["user_id"]
-            #     metadata_request = transactions.get_user_metadata(st.session_state.user_id)
-            #     if metadata_request["attempt"] == "succeeded":
-            #         st.success(metadata_request["message"])
-            #         st.session_state.user_metadata = metadata_request["data"]
-            #     else:
-            #         st.error(user_id_request["message"])
-            # else:
-            #     st.error(user_id_request["message"])
+            user_id_r = transactions.get_user_id_by_email(email)
+            if user_id_r["attempt"] == "succeeded":
+                st.success(user_id_r["message"])
+                user_id = user_id_r["data"]["user_id"]
+                st.session_state.user_id = user_id
+                metadata_r = transactions.read_user_metadata(user_id)
+                if metadata_r["attempt"] == "succeeded":
+                    st.success(metadata_r["message"])
+                    data = metadata_r["data"]
+                    if "customer_id" in data and data["customer_id"]:
+                        customer_id = data["customer_id"]
+                        customer_r = transactions.get_customer_by_stripe_id(customer_id)
+                        if customer_r["attempt"] == "succeeded":
+                            customer = customer_r["data"]
+                            st.session_state["customer"] = customer
+                else:
+                    st.error(user_id_r["message"])
+            else:
+                st.error(user_id_r["message"])
         else:
             st.error(submission["message"])
 
@@ -171,23 +180,31 @@ Then, using a https library, make an appropriate call to the endpoint. After com
     col_2.write("REST API (POST): https://markets.oasis-x.io/account/create/")
     st.write("*Create a Stripe Customer object for the logged in user. Customers represent users who will be charged by Oasis-X.*")
     new_customer_form = st.form("Create Stripe Customer")
-    # if "user_id" not in st.session_state or st.session_state.user_id == None or \
-    #     "user_email" not in st.session_state or st.session_state.user_email == None:
-    #     email = new_user_form.text_input("Email", disabled=True, value="Please login on the authentication page to proceed")
-    # else:
-    name = new_customer_form.text_input("Name")
-    email = new_customer_form.text_input("Email", disabled=True, value=st.session_state["user_email"])
-    user_id = new_customer_form.text_input("Oasis-X User ID", disabled=True, value=st.session_state["user_id"])
-    submitted = new_customer_form.form_submit_button("Create Customer")
-    if submitted:
-        submission = transactions.create_customer(user_id, email, name)
-        #Need to add attempt/allowed/message pattern to transactions api responses
-        print(f"account creation submission:{submission}")
-        if submission and submission["id"]:
-            stripe_customer_id = submission["id"]
-            st.success(submission)
-        else:
-            st.error(submission)
+    if st.session_state["customer"]: 
+        new_customer_form.write("A stripe customer has already been created for this user")
+        name = new_customer_form.text_input("Name", disabled=True, value=st.session_state.customer["name"])
+        email = new_customer_form.text_input("Email", disabled=True, value=st.session_state.customer["email"])
+        user_id = new_customer_form.text_input("Oasis-X User ID", disabled=True, value=st.session_state.customer.metadata["oasis_x_id"])
+    else:
+        name = new_customer_form.text_input("Name")
+        email = new_customer_form.text_input("Email", disabled=True, value=st.session_state["user_email"])
+        user_id = new_customer_form.text_input("Oasis-X User ID", disabled=True, value=st.session_state["user_id"])
+        submitted = new_customer_form.form_submit_button("Create Customer")
+        if submitted:
+            submission = transactions.create_customer(user_id, email, name)
+            #Need to add attempt/allowed/message pattern to transactions api responses
+            print(f"customer creation submission:{submission}")
+            if submission and submission["id"]:
+                stripe_customer_id = submission["id"]
+                st.session_state.metadata["customer_id"] = stripe_customer_id
+                save_customer_id_r = transactions.write_user_metadata(user_id, st.session_state.metadata)
+                print(f"save_customer_id_r: {save_customer_id_r}")
+                if save_customer_id_r["attempt"] == "succeeded":   
+                    st.success(save_customer_id_r)
+                else:
+                    str.error(save_customer_id_r)
+            else:
+                st.error(submission)
     
     #Fourth endpoint display: /account/create
     col_1, col_2 = st.columns(2)
@@ -197,15 +214,15 @@ Then, using a https library, make an appropriate call to the endpoint. After com
     st.write("*Create a Stripe account object and associated Stripe account link object.*")
     st.write("*These objects are created even if a user already has Stripe login credentials, with the account representing a parent object for storing information about activity on Oasis-X, and the account link being a temporary object which serves to facilitate linkage between Oasis-X and Stripe.*")
     st.write("*Accounts are only required for users which will receive payments, e.g. in a user-to-user marketplace transaction.*")
-    new_user_form = st.form("Create Stripe Account and Link")
+    new_account_form = st.form("Create Stripe Account and Link")
     # if "user_id" not in st.session_state or st.session_state.user_id == None or \
     #     "user_email" not in st.session_state or st.session_state.user_email == None:
     #     email = new_user_form.text_input("Email", disabled=True, value="Please login on the authentication page to proceed")
     # else:
-    email = new_user_form.text_input("Email", disabled=True, value=st.session_state["user_email"])
-    user_id = new_user_form.text_input("Oasis-X User ID", disabled=True, value=st.session_state["user_id"])
+    email = new_account_form.text_input("Email", disabled=True, value=st.session_state["user_email"])
+    user_id = new_account_form.text_input("Oasis-X User ID", disabled=True, value=st.session_state["user_id"])
     # Every form must have a submit button.
-    submitted = new_user_form.form_submit_button("Create Account Link")
+    submitted = new_account_form.form_submit_button("Create Account Link")
     if submitted:
         submission = transactions.create_stripe_account(email,user_id)
         #Need to add attempt/allowed/message pattern to transactions api responses
