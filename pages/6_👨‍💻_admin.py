@@ -17,19 +17,19 @@ st.set_page_config(page_title=" Oasis-Admin",
 from clients import admin_auth
 from utils import results
 
-# #Set session state in case page is refreshed or user otherwise lands on it before initialization
-# if "admin_user_id" not in st.session_state:
-#     st.session_state["admin_user_id"] = None
-# if "group_name" not in st.session_state:
-#     st.session_state["group_name"] = None
-# if "admin_refresh_token" not in st.session_state:
-#     st.session_state["admin_refresh_token"] = None
-# if "admin_user_id" not in st.session_state:
-#     st.session_state["admin_user_id"] = None
-# if "admin_id_token" not in st.session_state:
-#     st.session_state["admin_id_token"] = None
-# if "admin_email" not in st.session_state:
-#     st.session_state["admin_email"] = None
+#Set session state in case page is refreshed or user otherwise lands on it before initialization
+if "admin_user_id" not in st.session_state:
+    st.session_state["admin_user_id"] = None
+if "group_name" not in st.session_state:
+    st.session_state["group_name"] = None
+if "admin_refresh_token" not in st.session_state:
+    st.session_state["admin_refresh_token"] = None
+if "admin_user_id" not in st.session_state:
+    st.session_state["admin_user_id"] = None
+if "admin_id_token" not in st.session_state:
+    st.session_state["admin_id_token"] = None
+if "admin_email" not in st.session_state:
+    st.session_state["admin_email"] = None
 
 def run():
     st.title("Oasis-Auth (Admin API)")
