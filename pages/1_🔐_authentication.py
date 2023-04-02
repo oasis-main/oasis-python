@@ -431,6 +431,7 @@ delete_result["url"] # url of the web request made to server
     request_example.write("Here's the request URL with parameter values so you use the REST API:")
     try:
         request_str = submission["url"]
+        
     except:
         request_str = user_auth.delete_user("PLACEHOLDER", "PLACEHOLDER", "PLACEHOLDER", "PLACEHOLDER")["url"] #This should return a failure, but the URL should be intact
     request_example.write(request_str)
