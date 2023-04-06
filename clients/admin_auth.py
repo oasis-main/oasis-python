@@ -13,7 +13,7 @@ import config
 PWD = config.OS_PATH + config.CWD
 sys.path.append(PWD)
 
-from typing import Dict, Any
+from typing import Dict, Any, Optional
 
 from clients import user_auth
 from utils import results
@@ -21,8 +21,8 @@ from utils import results
 url=config.AUTH_DOMAIN
 
 def create_admin_account(admin_email: str, admin_password: str):
-    params = {"admin_email": admin_email, "admin_password": admin_password}
-    r = httpx.post(url +'/admin/new_account/', params = params)
+    data = {"admin_email": admin_email, "admin_password": admin_password}
+    r = httpx.post(url +'/admin/new_account/', json = data)
     #print(r.content)
     try:
         result = orjson.loads(r.content) 
@@ -32,8 +32,8 @@ def create_admin_account(admin_email: str, admin_password: str):
         return results.response(attempt=False, allowed=False, message = "Could not orjson.loads the response object",url=str(r.url))
 
 def change_admin_password(admin_email: str):
-    params = {"admin_email": admin_email}
-    r = httpx.post(url +'/admin/change_password/', params = params)
+    data = {"admin_email": admin_email}
+    r = httpx.post(url +'/admin/change_password/', json = data)
     try:
         result = orjson.loads(r.content) 
         result.update({"url": str(r.url)})
@@ -42,8 +42,8 @@ def change_admin_password(admin_email: str):
         return results.response(attempt=False, allowed=False, message = "Could not orjson.loads the response object",url=str(r.url))
 
 def admin_login(admin_email: str, admin_password: str, return_tokens = False):
-    params = {"admin_email": admin_email, "admin_password": admin_password}
-    r = httpx.post(url +'/admin/login/password/', params = params)
+    data = {"admin_email": admin_email, "admin_password": admin_password}
+    r = httpx.post(url +'/admin/login/password/', json = data)
     try:
         login_result = orjson.loads(r.content) 
         login_result.update({"url": str(r.url)})
@@ -56,25 +56,25 @@ def admin_login(admin_email: str, admin_password: str, return_tokens = False):
     else:
         return login_result 
 
-def get_admin_session(admin_refresh_token: str, return_tokens = False): 
-    params = {"admin_refresh_token": admin_refresh_token}
-    r = httpx.post(url +'/admin/login/session/', params = params)
+def get_admin_session(admin_refresh_token: str, return_tokens = False):
+    data = {"admin_refresh_token": admin_refresh_token} 
+    r = httpx.post(url +'/admin/login/session/', json = data) 
     try:
-        session_result = orjson.loads(r.content)
-        session_result.update({"url": str(r.url)})
+        session_result = orjson.loads(r.content) 
+        session_result.update({"url": str(r.url)}) 
     except:
-        return results.response(attempt=False, allowed=False, message = "Could not orjson.loads the response object",url=str(r.url))
-    #print(session_result) #debugging
+        return results.response(attempt=False, allowed=False, message = "Could not orjson.loads the response object",url=str(r.url)) 
+    print(session_result) #debugging (<- something tells me I've been here before)
     if return_tokens and r.status_code == httpx.codes.OK:
-        admin_user_id = session_result["data"]["admin_user_id"]
-        admin_id_token = session_result["data"]["admin_id_token"]
-        return admin_user_id, admin_id_token
+        admin_user_id = session_result["data"]["admin_user_id"] 
+        admin_id_token = session_result["data"]["admin_id_token"] 
+        return admin_user_id, admin_id_token 
     else:
         return session_result 
 
 def verify_admin_session(admin_user_id: str, admin_id_token: str):
-    params = {"admin_user_id": admin_user_id, "admin_id_token": admin_id_token}
-    r = httpx.post(url +'/admin/verify_session/', params = params)
+    data = {"admin_user_id": admin_user_id, "admin_id_token": admin_id_token}
+    r = httpx.post(url +'/admin/verify_session/', json = data)
     try:
         result = orjson.loads(r.content) 
         result.update({"url": str(r.url)})
@@ -82,9 +82,9 @@ def verify_admin_session(admin_user_id: str, admin_id_token: str):
     except:
         return results.response(attempt=False, allowed=False, message = "Could not orjson.loads the response object",url=str(r.url))
 
-def create_user_group(admin_user_id: str, admin_id_token: str, new_group_name: str, group_user_params: Dict[str, Any] = {}):
-    params = {"admin_user_id": admin_user_id, "admin_id_token": admin_id_token, "new_group_name": new_group_name, "group_user_params" : orjson.dumps(group_user_params) }
-    r = httpx.post(url +'/admin/create_user_group/', params = params)
+def create_user_group(admin_user_id: str, admin_id_token: str, new_group_name: str, custom_default_metadata: Dict[str, Any] = {}):
+    data = {"admin_user_id": admin_user_id, "admin_id_token": admin_id_token, "new_group_name": new_group_name, "custom_default_metadata" : str(orjson.dumps(custom_default_metadata), encoding='utf-8')}
+    r = httpx.post(url +'/admin/create_user_group/', json = data)
     try:
         result = orjson.loads(r.content) 
         result.update({"url": str(r.url)})
@@ -93,8 +93,8 @@ def create_user_group(admin_user_id: str, admin_id_token: str, new_group_name: s
         return results.response(attempt=False, allowed=False, message = "Could not orjson.loads the response object",url=str(r.url))
 
 def get_admins_groups(admin_user_id: str, admin_id_token: str, return_list = False):
-    params = {"admin_user_id": admin_user_id, "admin_id_token": admin_id_token}
-    r = httpx.get(url +'/admin/get_user_groups/', params = params)
+    data = {"admin_user_id": admin_user_id, "admin_id_token": admin_id_token}
+    r = httpx.post(url +'/admin/get_user_groups/', json = data)
     try:
         result = orjson.loads(r.content)
         result.update({"url": str(r.url)})
@@ -108,8 +108,8 @@ def get_admins_groups(admin_user_id: str, admin_id_token: str, return_list = Fal
         return result 
 
 def get_group_users(admin_user_id: str, admin_id_token: str, group_name: str, return_list = False):
-    params = {"admin_user_id": admin_user_id, "admin_id_token": admin_id_token, "group_name": group_name}
-    r = httpx.get(url +'/admin/get_group_users/', params = params)
+    data = {"admin_user_id": admin_user_id, "admin_id_token": admin_id_token, "group_name": group_name}
+    r = httpx.post(url +'/admin/get_group_users/', json = data)
     try:
         result = orjson.loads(r.content)
         result.update({"url": str(r.url)})
@@ -123,8 +123,8 @@ def get_group_users(admin_user_id: str, admin_id_token: str, group_name: str, re
         return result 
 
 def get_user_id_by_email(user_email: str, admin_user_id: str, admin_id_token: str, group_name: str):
-    params = {"user_email": user_email, "admin_user_id": admin_user_id, "admin_id_token": admin_id_token, "group_name": group_name}
-    r = httpx.get(url +'/admin/get_uid_by_email/', params = params)
+    data = {"user_email": user_email, "admin_user_id": admin_user_id, "admin_id_token": admin_id_token, "group_name": group_name}
+    r = httpx.post(url +'/admin/get_uid_by_email/', json = data)
     try:
         user_id_result = orjson.loads(r.content)
         user_id_result.update({"url": str(r.url)})
@@ -134,8 +134,8 @@ def get_user_id_by_email(user_email: str, admin_user_id: str, admin_id_token: st
     return user_id_result
 
 def get_user_email(user_id: str, admin_user_id: str, admin_id_token: str, group_name: str):
-    params = {"user_id": user_id, "admin_user_id": admin_user_id, "admin_id_token": admin_id_token, "group_name": group_name}
-    r = httpx.get(url +'/admin/get_email_by_uid/', params = params)
+    data = {"user_id": user_id, "admin_user_id": admin_user_id, "admin_id_token": admin_id_token, "group_name": group_name}
+    r = httpx.post(url +'/admin/get_email_by_uid/', json = data)
     try:
         user_email_result = orjson.loads(r.content)
         user_email_result.update({"url": str(r.url)})
@@ -144,9 +144,20 @@ def get_user_email(user_id: str, admin_user_id: str, admin_id_token: str, group_
         return results.response(attempt=False,allowed=False,message="Could not orjson.loads the response object",url=str(r.url)) 
     return user_email_result
 
+def get_user_info(user_id: str, admin_user_id: str, admin_id_token: str, group_name: str):
+    data = {"user_id": user_id, "admin_user_id": admin_user_id, "admin_id_token": admin_id_token, "group_name": group_name}
+    r = httpx.post(url +'/admin/get_user_info/', json = data)
+    try:
+        user_info_result = orjson.loads(r.content)
+        user_info_result.update({"url": str(r.url)})
+        #print(user_info_result)
+    except:
+        return results.response(attempt=False,allowed=False,message="Could not orjson.loads the response object",url=str(r.url)) 
+    return user_info_result
+
 def read_user_metadata(admin_user_id: str, admin_id_token: str, user_id: str, group: str):
-    params = {"admin_user_id": admin_user_id, "admin_id_token": admin_id_token, "user_id": user_id, "group": group}
-    r = httpx.get(url +'/admin/read_user_metadata/', params = params)
+    data = {"admin_user_id": admin_user_id, "admin_id_token": admin_id_token, "user_id": user_id, "group": group}
+    r = httpx.post(url +'/admin/read_user_metadata/', json = data)
     try:
         result = orjson.loads(r.content) 
         result.update({"url": str(r.url)})
@@ -154,9 +165,9 @@ def read_user_metadata(admin_user_id: str, admin_id_token: str, user_id: str, gr
     except:
         return results.response(attempt=False, allowed=False, message = "Could not orjson.loads the response object",url=str(r.url))
 
-def write_user_metadata(admin_user_id: str, admin_id_token: str, user_id: str, group: str, dictionary: Dict[str, Any]): #all dicts passed to fastapi over HTTP must be string representations
-    params = {"admin_user_id": admin_user_id, "admin_id_token": admin_id_token, "user_id": user_id, "group": group, "dictionary": orjson.dumps(dictionary)}
-    r = httpx.post(url +'/admin/write_user_metadata/', params = params)
+def write_user_metadata(admin_user_id: str, admin_id_token: str, user_id: str, group: str, new_key_values: Dict[str, Any]): #all dicts passed to fastapi over HTTP must be string representations
+    data = {"admin_user_id": admin_user_id, "admin_id_token": admin_id_token, "user_id": user_id, "group": group, "new_key_values": str(orjson.dumps(new_key_values), encoding='utf-8')}
+    r = httpx.post(url +'/admin/write_user_metadata/', json = data)
     #print(r)
     #print(r.content)
     #print(r.url)
@@ -168,8 +179,8 @@ def write_user_metadata(admin_user_id: str, admin_id_token: str, user_id: str, g
         return results.response(attempt=False, allowed=False, message = "Could not orjson.loads the response object",url=str(r.url))
 
 def reset_user(admin_user_id: str, admin_id_token: str, user_id: str, group_name: str):
-    params = {"admin_user_id": admin_user_id, "admin_id_token": admin_id_token, "user_id": user_id, "group_name": group_name}
-    r = httpx.post(url +'/admin/reset_user/', params=params)
+    data = {"admin_user_id": admin_user_id, "admin_id_token": admin_id_token, "user_id": user_id, "group_name": group_name}
+    r = httpx.post(url +'/admin/reset_user/', json=data)
     try:
         result = orjson.loads(r.content)
         result.update({"url": str(r.url)})
@@ -177,9 +188,9 @@ def reset_user(admin_user_id: str, admin_id_token: str, user_id: str, group_name
     except:
         return results.response(attempt=False, allowed=False, message = "Could not orjson.loads the response object",url=str(r.url))
 
-def change_group_schema(admin_user_id: str, admin_id_token: str, group_name: str, new_schema_dict: Dict[str, Any], reset_all: bool):
-    params = {"admin_user_id": admin_user_id, "admin_id_token": admin_id_token, "group_name": group_name, "new_schema_dict": orjson.dumps(new_schema_dict), "reset_all": reset_all}
-    r = httpx.post(url +'/admin/change_group_schema/', params = params)
+def change_group_schema(admin_user_id: str, admin_id_token: str, group_name: str, new_schema_key_defaults: Dict[str, Any], reset_all: Optional[bool] = False):
+    data = {"admin_user_id": admin_user_id, "admin_id_token": admin_id_token, "group_name": group_name, "new_schema_key_defaults": str(orjson.dumps(new_schema_key_defaults), encoding='utf-8'), "reset_all": reset_all}
+    r = httpx.post(url +'/admin/change_group_schema/', json = data)
     #print(r)
     #print(r.content)
     #print(r.url)
@@ -191,8 +202,8 @@ def change_group_schema(admin_user_id: str, admin_id_token: str, group_name: str
         return results.response(attempt=False, allowed=False, message = "Could not orjson.loads the response object",url=str(r.url))
 
 def admin_delete_user(admin_user_id: str, admin_id_token: str, user_id: str, group_name: str):
-    params = {"admin_user_id": admin_user_id, "admin_id_token": admin_id_token, "user_id": user_id, "group_name": group_name}
-    r = httpx.delete(url +'/admin/delete_user/', params = params)
+    data = {"admin_user_id": admin_user_id, "admin_id_token": admin_id_token, "user_id": user_id, "group_name": group_name}
+    r = httpx.post(url +'/admin/delete_user/', json = data)
     try:
         result = orjson.loads(r.content) 
         result.update({"url": str(r.url)})
@@ -201,8 +212,8 @@ def admin_delete_user(admin_user_id: str, admin_id_token: str, user_id: str, gro
         return results.response(attempt=False, allowed=False, message = "Could not orjson.loads the response object",url=str(r.url))
 
 def delete_group(admin_user_id: str,admin_id_token: str, group_name: str):
-    params = {"admin_user_id": admin_user_id, "admin_id_token": admin_id_token, "group_name": group_name}
-    r = httpx.delete(url +'/admin/delete_group/', params = params)
+    data = {"admin_user_id": admin_user_id, "admin_id_token": admin_id_token, "group_name": group_name}
+    r = httpx.post(url +'/admin/delete_group/', json = data)
     print(r)
     print(r.content)
     print(r.url)
@@ -214,8 +225,8 @@ def delete_group(admin_user_id: str,admin_id_token: str, group_name: str):
         return results.response(attempt=False, allowed=False, message = "Could not orjson.loads the response object",url=str(r.url))
 
 def delete_admin_account(admin_email: str, admin_password: str):
-    params = {"admin_email": admin_email, "admin_password": admin_password}
-    r = httpx.delete(url +'/admin/delete_admin_account/', params = params)
+    data = {"admin_email": admin_email, "admin_password": admin_password}
+    r = httpx.post(url +'/admin/delete_admin_account/', json = data)
     try:
         result = orjson.loads(r.content) 
         result.update({"url": str(r.url)})
@@ -248,9 +259,12 @@ if __name__ == "__main__":
     if sys.argv[1] == "test_authentication":
         print("Testing admin login w/ username & password...")
         admin_refresh_token = admin_login(admin_email="hello@oasis-x.io", admin_password=admin_pass, return_tokens=True)
-        print("Success.")
+        #print(type(admin_refresh_token))
+        #print("Success: " + admin_refresh_token)
         print("Testing retreival of admin session w/ refresh token...")
         admin_user_id, admin_id_token = get_admin_session(admin_refresh_token, return_tokens=True) #return tokens to upack the response data into a tuple
+        #print(admin_user_id)
+        #print(admin_id_token)
         print("Success")
         print("Testing verification of admin session w/ local credentials...")
         print(verify_admin_session(admin_user_id, admin_id_token))
@@ -266,11 +280,11 @@ if __name__ == "__main__":
         #Should succeed and return a user object
         print(read_user_metadata(admin_user_id, admin_id_token, user_id, "oasis-users"))
         #Should succeed and return a write result for default oasis values
-        print(write_user_metadata(admin_user_id, admin_id_token, user_id, group= "oasis-users", dictionary= {"current_plan_last_billing": datetime.now()}))
+        print(write_user_metadata(admin_user_id, admin_id_token, user_id, group= "oasis-users", new_key_values= {"current_plan_last_billing": datetime.now()}))
    
     #Delete the user you made for the above tests
     if sys.argv[1] == "test_delete_user":
-        from utils import firebase
+        from utils import firebase #Need to have this here
 
         print("Testing admin login w/ username & password...")
         admin_refresh_token = admin_login(admin_email="hello@oasis-x.io", admin_password=admin_pass, return_tokens=True)
@@ -352,10 +366,26 @@ if __name__ == "__main__":
         print("Testing get_user_id_by_email...")
         result = get_user_id_by_email(user_email, admin_user_id, admin_id_token, "oasis-users")
         user_id = result["data"]["user_id"]
-        print("User-Identifying String:" + user_id)
+        print("User ID:" + user_id)
 
         print("Testing get user email...")
         result = get_user_email(user_id, admin_user_id, admin_id_token, "oasis-users")
         user_email = result["data"]["user_email"]
         print("User Email:" + user_email)
 
+        print("Testing get user info...")
+        result = get_user_info(user_id, admin_user_id, admin_id_token, "oasis-users")
+        user_info = result["data"]
+        print("IAM Info:" + str(user_info["IAM"]))
+        print("Oasis-Ecosystem Info:" + str(user_info["Oasis-Ecosystem"]))
+
+    if sys.argv[1] == "update_default_user_schema":
+        admin_refresh_token = admin_login(admin_email="hello@oasis-x.io", admin_password=admin_pass, return_tokens=True)
+        print("Success.")
+        print("Testing retreival of admin session w/ refresh token...")
+        admin_user_id, admin_id_token = get_admin_session(admin_refresh_token, return_tokens=True)
+        
+        with open(PWD + "/configs/default_user_group_params.json", mode="rb+") as file_obj:
+            data = orjson.loads(file_obj.read())
+
+        change_group_schema(admin_user_id, admin_id_token, group_name="oasis-users", new_schema_key_defaults=data)

@@ -38,6 +38,8 @@ if "metadata" not in st.session_state:
     }
 if "customer" not in st.session_state:
     st.session_state["customer"] = {}
+if "customer_subscriptions" in st.session_state:
+    st.session_state["customer_subscriptions"] = []
 
 def run():
     st.title('Oasis-X Markets Admin Portal')
@@ -118,11 +120,15 @@ Then, using a https library, make an appropriate call to the endpoint. After com
         submission = transactions.password_login(email, password)
         if submission["attempt"] == "succeeded":
             st.success(submission["message"])
-            user_id_r = transactions.get_user_id_by_email(email)
-            if user_id_r["attempt"] == "succeeded":
-                st.success(user_id_r["message"])
-                user_id = user_id_r["data"]["user_id"]
-                st.session_state.user_id = user_id
+            refresh_token = submission["data"]["refresh_token"]
+            st.session_state["refresh_token"] = refresh_token
+            create_session_r = transactions.create_user_session(refresh_token)
+            if create_session_r["attempt"] == "succeeded":
+                st.success(create_session_r["message"])
+                user_id = create_session_r["data"]["user_id"]
+                id_token = create_session_r["data"]["id_token"]
+                st.session_state["user_id"] = user_id
+                st.session_state["id_token"] = id_token
                 metadata_r = transactions.read_user_metadata(user_id)
                 if metadata_r["attempt"] == "succeeded":
                     st.success(metadata_r["message"])
@@ -130,13 +136,22 @@ Then, using a https library, make an appropriate call to the endpoint. After com
                     if "customer_id" in data and data["customer_id"]:
                         customer_id = data["customer_id"]
                         customer_r = transactions.get_customer_by_stripe_id(customer_id)
+                        #Get customer data
                         if customer_r["attempt"] == "succeeded":
                             customer = customer_r["data"]
                             st.session_state["customer"] = customer
+                        else:
+                            st.error(customer_r["message"])
+                        #Get subscription data
+                        customer_subscription_r = transactions.list_customer_subscriptions(customer_id)
+                        if customer_subscription_r["attempt"] == "succeeded":
+                            customer_subscriptions = customer_subscriptions_r["data"]
+                            st.session_state["customer_subscriptions"] = customer_subscriptions
+                        else:
+                            st.error(customer_subscription_r["message"])
                 else:
-                    st.error(user_id_r["message"])
-            else:
-                st.error(user_id_r["message"])
+                    st.error(metadata_r["message"])
+            else: st.error(create_session_r["message"])
         else:
             st.error(submission["message"])
 
@@ -205,8 +220,41 @@ Then, using a https library, make an appropriate call to the endpoint. After com
                     str.error(save_customer_id_r)
             else:
                 st.error(submission)
+
+    #Fourth endpoint display: /subscription/create/ and /subscription/update/
+    col_1, col_2 = st.columns(2)
+    col_1.subheader("Create Subscription")
+    col_2.write("")
+    col_2.write("REST API (POST): https://markets.oasis-x.io/account/create/")
+    st.write("*Create a Stripe Subscription object for the logged in user.*")
+    new_subscription_form = st.form("Create Subscription")
+    if st.session_state["subscriptions"]: 
+        new_subscription_form.write("Existing subscriptions:")
+        name = new_subscription_form.text_input("Name", disabled=True, value=st.session_state.customer["name"])
+        email = new_subscription_form.text_input("Email", disabled=True, value=st.session_state.customer["email"])
+        user_id = new_subscription_form.text_input("Oasis-X User ID", disabled=True, value=st.session_state.customer.metadata["oasis_x_id"])
+    # else:
+    #     name = new_customer_form.text_input("Name")
+    #     email = new_customer_form.text_input("Email", disabled=True, value=st.session_state["user_email"])
+    #     user_id = new_customer_form.text_input("Oasis-X User ID", disabled=True, value=st.session_state["user_id"])
+    #     submitted = new_customer_form.form_submit_button("Create Customer")
+    #     if submitted:
+    #         submission = transactions.create_customer(user_id, email, name)
+    #         #Need to add attempt/allowed/message pattern to transactions api responses
+    #         print(f"subscription creation submission:{submission}")
+    #         if submission and submission["id"]:
+    #             stripe_subscription_id = submission["id"]
+    #             st.session_state.metadata["stripe_subscription_id"] = stripe_subscription_id
+    #             save_subscription_id_r = transactions.write_user_metadata(user_id, st.session_state.metadata)
+    #             print(f"save_customer_id_r: {save_customer_id_r}")
+    #             if save_customer_id_r["attempt"] == "succeeded":   
+    #                 st.success(save_customer_id_r)
+    #             else:
+    #                 str.error(save_customer_id_r)
+    #         else:
+    #             st.error(submission)
     
-    #Fourth endpoint display: /account/create
+    #Fifth endpoint display: /account/create
     col_1, col_2 = st.columns(2)
     col_1.subheader("Create Stripe Account and Account Link")
     col_2.write("")

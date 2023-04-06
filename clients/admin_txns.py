@@ -37,6 +37,29 @@ def password_login(email: str, password: str):
         return results.response(attempt=False,allowed=False,message=r.message,url=str(r.url)) 
     return login_result
 
+def create_user_session(refresh_token: str):
+    path = server_uri + '/user/create_session/'
+    data = {"refresh_token": refresh_token}
+    print(f"create_user_session data: {data}")
+    r = httpx.post(path, json = data)
+    try:
+        session_result = orjson.loads(r.content)
+        session_result.update({"url": str(r.url)})
+    except:
+        return results.response(attempt=False,allowed=False,message=r.message,url=str(r.url)) 
+    return session_result
+
+def verify_user_session(user_id: str, id_token: str):
+    path = server_uri + '/user/create_session/'
+    json_body = {"refresh_token": refresh_token}
+    r = httpx.post(path, json = json_body)
+    try:
+        verify_result = orjson.loads(r.content)
+        verify_result.update({"url": str(r.url)})
+    except:
+        return results.response(attempt=False,allowed=False,message=r.message,url=str(r.url)) 
+    return verify_result
+
 def get_user_id_by_email(email: str):
     params = {"email": email}
     r = httpx.get(server_uri + '/user/get_id_by_email/', params = params)
@@ -58,7 +81,7 @@ def read_user_metadata(oasis_x_id: str):
     return attempt_result
 
 def write_user_metadata(oasis_x_id: str, dictionary: Dict[str, Any]):
-    params = {"user_id": oasis_x_id, "dictionary": json.dumps(dictionary)}
+    params = {"user_id": oasis_x_id, "dictionary": orjson.dumps(dictionary)}
     r = httpx.post(server_uri + '/user/write_metadata/', params = params)
     try:
         attempt_result = orjson.loads(r.content)
@@ -156,18 +179,28 @@ def list_prices():
     return data
 
 #Subscription functions
-def list_subscriptions(customer_id: str):
+def list_customer_subscriptions(customer_id: str):
     path = server_uri + '/subscription/list/'
     response = httpx.get(path)
     attempt_result = orjson.loads(response.text)
     data = attempt_result.get('data')
     return data
 
-#Checkout functions
-def create_checkout_session(price_id: str, quantity: int, mode: str, success_url: str, cancel_url: str):
+def create_subscription(user_id: str, id_token: str, price_id: str, success_url: str, cancel_url: str):
+    #No dedicated create_subscription endpoint yet, though we could create one if necessary
     path = server_uri + '/checkout/create/'
-    params = {'price_id': price_id, 'quantity': quantity, 'mode': mode, 'success_url': success_url, 'cancel_url': cancel_url }
-    r = httpx.post(path, params = params)
-    attempt_result = orjson.loads(r.text) #we're going to have to parse this into a return json for each one
-    return attempt_result
+    json_body = { 'price_id': price_id, 'quantity': 1, 'mode': "subscription", 'success_url': success_url, 'cancel_url': cancel_url }
+    r = httpx.post(path, json = json_body)
+    attempt_result = orjson.loads(r.text)
+    data = attempt_result.get('data')
+    return data
+
+#Checkout functions
+def create_checkout_session(user_id: str, id_token: str, price_id: str, quantity: int, mode: str, success_url: str, cancel_url: str):
+    path = server_uri + '/checkout/create/'
+    json_body = {'user_id': user_id, 'id_token': id_token, 'price_id': price_id, 'quantity': quantity, 'mode': mode, 'success_url': success_url, 'cancel_url': cancel_url }
+    r = httpx.post(path, json = json_body)
+    attempt_result = orjson.loads(r.text)
+    data = attempt_result.get('data')
+    return data
 
