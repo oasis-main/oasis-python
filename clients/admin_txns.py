@@ -40,7 +40,6 @@ def password_login(email: str, password: str):
 def create_user_session(refresh_token: str):
     path = server_uri + '/user/create_session/'
     data = {"refresh_token": refresh_token}
-    print(f"create_user_session data: {data}")
     r = httpx.post(path, json = data)
     try:
         session_result = orjson.loads(r.content)
@@ -80,9 +79,11 @@ def read_user_metadata(oasis_x_id: str):
         return results.response(attempt=False,allowed=False,message=r.message,url=str(r.url)) 
     return attempt_result
 
-def write_user_metadata(oasis_x_id: str, dictionary: Dict[str, Any]):
-    params = {"user_id": oasis_x_id, "dictionary": orjson.dumps(dictionary)}
-    r = httpx.post(server_uri + '/user/write_metadata/', params = params)
+def write_user_metadata(oasis_x_id: str, metadata: Dict[str, Any]):
+    path = server_uri + '/user/write_metadata/'
+    body = {"user_id": oasis_x_id, "metadata": str(orjson.dumps(metadata), encoding="utf-8")}
+    print(f"write_user_metadata body: {body}")
+    r = httpx.post(path, json = body)
     try:
         attempt_result = orjson.loads(r.content)
         attempt_result.update({"url": str(r.url)})

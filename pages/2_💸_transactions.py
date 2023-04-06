@@ -34,11 +34,11 @@ if "user_email" not in st.session_state:
     st.session_state["user_email"] = ""
 if "metadata" not in st.session_state:
     st.session_state["metadata"] = {
-        "customer_id": ""
+        "stripe_customer_id": ""
     }
 if "customer" not in st.session_state:
     st.session_state["customer"] = {}
-if "customer_subscriptions" in st.session_state:
+if "customer_subscriptions" not in st.session_state:
     st.session_state["customer_subscriptions"] = []
 
 def run():
@@ -133,9 +133,9 @@ Then, using a https library, make an appropriate call to the endpoint. After com
                 if metadata_r["attempt"] == "succeeded":
                     st.success(metadata_r["message"])
                     data = metadata_r["data"]
-                    if "customer_id" in data and data["customer_id"]:
-                        customer_id = data["customer_id"]
-                        customer_r = transactions.get_customer_by_stripe_id(customer_id)
+                    if "stripe_customer_id" in data and data["stripe_customer_id"]:
+                        stripe_customer_id = data["customer_id"]
+                        customer_r = transactions.get_customer_by_stripe_id(stripe_customer_id)
                         #Get customer data
                         if customer_r["attempt"] == "succeeded":
                             customer = customer_r["data"]
@@ -143,7 +143,7 @@ Then, using a https library, make an appropriate call to the endpoint. After com
                         else:
                             st.error(customer_r["message"])
                         #Get subscription data
-                        customer_subscription_r = transactions.list_customer_subscriptions(customer_id)
+                        customer_subscription_r = transactions.list_customer_subscriptions(stripe_customer_id)
                         if customer_subscription_r["attempt"] == "succeeded":
                             customer_subscriptions = customer_subscriptions_r["data"]
                             st.session_state["customer_subscriptions"] = customer_subscriptions
@@ -211,7 +211,7 @@ Then, using a https library, make an appropriate call to the endpoint. After com
             print(f"customer creation submission:{submission}")
             if submission and submission["id"]:
                 stripe_customer_id = submission["id"]
-                st.session_state.metadata["customer_id"] = stripe_customer_id
+                st.session_state.metadata["stripe_customer_id"] = stripe_customer_id
                 save_customer_id_r = transactions.write_user_metadata(user_id, st.session_state.metadata)
                 print(f"save_customer_id_r: {save_customer_id_r}")
                 if save_customer_id_r["attempt"] == "succeeded":   
@@ -228,7 +228,7 @@ Then, using a https library, make an appropriate call to the endpoint. After com
     col_2.write("REST API (POST): https://markets.oasis-x.io/account/create/")
     st.write("*Create a Stripe Subscription object for the logged in user.*")
     new_subscription_form = st.form("Create Subscription")
-    if st.session_state["subscriptions"]: 
+    if st.session_state["customer_subscriptions"]: 
         new_subscription_form.write("Existing subscriptions:")
         name = new_subscription_form.text_input("Name", disabled=True, value=st.session_state.customer["name"])
         email = new_subscription_form.text_input("Email", disabled=True, value=st.session_state.customer["email"])
