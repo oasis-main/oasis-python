@@ -625,6 +625,69 @@ Then, using a https library, make an appropriate call to the endpoint. After com
     except:
         request_example.write(results.response(True,True,message="This is an example response", url = request_str))
 
+#Endpoint: /admin/get_user_info/
+#Function: admin_auth.get_user_info(user_id: str, admin_user_id: str, admin_id_token: str, group_name: str)
+#Additional Response Data (submission["data"]):  Dict["IAM": Dict[str, Any], "Oasis-Ecosystem": Dict[str, Any] ]
+#Demo Interface: 
+
+    col_1, col_2 = st.columns(2)
+    col_1.subheader("Get User Info")
+    col_2.write("")
+    col_2.write("REST API (GET): https://auth.oasis-x.io/admin/get_user_info/")
+    st.write("*Get a user's info*")
+    get_user_info_form = st.form("Get User Info")
+
+    admin_user_id = get_user_info_form.text_input("Admin User ID", help="This will auto-load if you've done the session login above.", value = st.session_state["admin_user_id"])
+    admin_id_token = get_user_info_form.text_input("Admin Session ID Token", help="This will also auto-load if you've done the session login above ", value = st.session_state["admin_id_token"])
+    user_id = get_user_info_form.text_input("User ID", help="The ID of the user you want to get the info of.", value = st.session_state["user_id"])
+    group_name = get_user_info_form.text_input("Group Name", help="The group the user belongs to.")
+
+    # Every form must have a submit button.
+    submitted = get_user_info_form.form_submit_button("Get User Info")
+    if submitted:
+        submission = admin_auth.get_user_info(user_id, admin_user_id, admin_id_token, group_name)
+        if submission["attempt"] == "succeeded":
+            st.success(submission["message"])
+        else:
+            st.error(submission["message"])
+
+    #Provide a code example 
+    code_example = st.expander("Code Example (Python)")
+    code_example.write("Here's how to imlement this in your app using the oasis-python library:")
+    code_example.code(
+"""
+from clients import admin_auth #Make sure the environment is set up
+user_info_result = admin_auth.get_user_info(user_id, admin_user_id, admin_id_token, group_name) # pings authentication server
+
+#View the user's info
+user_info_result["data"]["IAM"] # user's IAM info
+user_info_result["data"]["Oasis-Ecosystem"] # user's Oasis-Ecosystem info
+
+user_info_result["attempt"] # "succeeded" or "failed"
+user_info_result["allowed"] # "ok" or "no
+user_info_result["message"] # information about the request
+user_info_result["url"] # url of the web request made to server
+user_info_result["response_code"] # status of the http request  
+
+"""
+, language = "python") #Leave this off to the left or streamlit will indent it, unfortunately
+    
+    #Show how the request is put together
+    request_example = st.expander("Request Example (HTTPS)")
+    request_example.write("Here's the request URL with parameter values so you use the REST API:")
+    try:
+        request_str = submission["url"]
+    except:
+        request_str = admin_auth.get_user_info("PLACEHOLDER", "PLACEHOLDER", "PLACEHOLDER", "PLACEHOLDER")["url"] #This should return a failure, but the URL should be intact
+    request_example.write(request_str)
+    request_example.write("""Work with a language of your choice by substituting the placeholders or submitted info with your own values. 
+Then, using a https library, make an appropriate call to the endpoint. After completing the web request, use a json tool to deserialize the byte response into a native object and access its properties:""")
+    try:
+        print(submission)
+        request_example.write(submission)
+    except:
+        request_example.write(results.response(True,True,message="This is an example response", url = request_str))
+
 #Endpoint: /admin/read_user/
 #Function: admin_auth.read_user_metadata(admin_user_id: str, admin_id_token: str, user_id: str, group: str)
 #Additional Response Data (submission["data"]):  user_id: Dict[str,Any]
@@ -701,7 +764,7 @@ Then, using a https library, make an appropriate call to the endpoint. After com
     admin_id_token = write_user_form.text_input("Admin Session ID Token", help="This will also auto-load if you've done the session login above ", value = st.session_state["admin_id_token"])
     user_id = write_user_form.text_input("User ID", help="The ID of the user you want to write metadata to.")
     group = write_user_form.text_input("Group", help="The group the user belongs to.")
-    dictionary = write_user_form.text_input("Dictionary", help="The dictionary of metadata you want to write to the user. Must be a string representation of a dictionary.")
+    dictionary = write_user_form.text_input("Dictionary", help="The dictionary of metadata you want to write to the user")
 
     # Every form must have a submit button.
     submitted = write_user_form.form_submit_button("Write User Metadata")
