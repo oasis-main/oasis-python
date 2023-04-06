@@ -303,13 +303,83 @@ Then, using a https library, make an appropriate call to the endpoint. After com
         request_example.write(results.response(True,True,message="This is an example response", url = request_str))
 
 
+#Endpoint 5: /user/access_request/
+#Function: user_auth.request_user_access(id_token: str, user_id: str, admin_user_id: str, group: str, data_type: Literal["allowance_count","credit_balance","clearance_code"], field: str, required: str, emissions_kg: float = 0.0000, check_only: bool = False)
+#Additional Response Data (submission["data"]): None
+#Demo Interface: 
+    col_1, col_2 = st.columns(2)
+    col_1.subheader("Request User Access")
+    col_2.write("")
+    col_2.write("REST API (POST): https://auth.oasis-x.io/user/access_request/")
+    st.write("*Request access to a user's data. Ideal for clients with **limited permission** (iot devices, web browsers, public terminals & displays)*")
+    new_user_form = st.form("Request Access")
+
+    user_id = new_user_form.text_input("User ID", help="This will auto-load if you've done the session login above.", value = st.session_state["user_id"])
+    id_token = new_user_form.text_input("Session ID Token", help="This will also auto-load if you've done the session login above ", value = st.session_state["id_token"])
+    data_type = new_user_form.selectbox("Data Type", ["allowance_count", "credit_balance", "clearance_code"])
+    field = new_user_form.text_input("Field", help="The field you are requesting access to.")
+    required = new_user_form.text_input("Required", help="The value you are requesting access to.")
+    emissions_kg = new_user_form.number_input("Emissions (kg)", help="The emissions associated with the request (optional).", value = 0.0000)
+    check_only = new_user_form.checkbox("Check Only", help="Check if the user has access without actually granting it.")
+
+    # Every form must have a submit button.
+    submitted = new_user_form.form_submit_button("Request Access")
+    if submitted:
+        submission = user_auth.request_user_access(id_token, user_id, st.session_state["admin_user_id"], st.session_state["group_name"], data_type, field, required, emissions_kg, check_only)
+        if submission["attempt"] == "succeeded":
+            st.success(submission["message"])
+        else:
+            st.error(submission["message"])
+
+    #Provide a code example 
+    code_example = st.expander("Code Example (Python)")
+    code_example.write("Here's how to imlement this in your app using the oasis-python library:")
+    code_example.code(
+"""
+from clients import user_auth #Make sure the environment is set up
+access_result = user_auth.request_user_access(id_token, user_id, admin_user_id, group, data_type, field, required, emissions_kg, check_only) # pings authentication server
+
+if access_result["attempt"] == "succeeded": #make sure you are calling the correct endpoint and inspecting the right object as this is critical to security
+    navigate_homepage(user_id) # <- your code goes here
+else:
+    navigate_login(error) # <- your code goes here
+
+#You can also do this:
+
+if access_result["allowed"] == "ok": #For security reasons we will never return an attempt == "succeeded" and allowed = "no" in the same message, and vice versa
+    print("Access Granted.") #This is to help developers 
+else:
+    print(access_result["message"]) #For more information into the nature of the error, you can inspect the message
+    print(access_result["response_code"]) #As well as the http response code: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status
+
+#This one doesn't come with any data, just the standard response
+access_result["attempt"] # "succeeded" or "failed"
+access_result["allowed"] # "ok" or "no
+access_result["message"] # information about the request
+access_result["url"] # url of the web request made to server
+"""
+, language = "python") #Leave this off to the left or streamlit will indent it, unfortunately
+    
+    #Show how the request is put together
+    request_example = st.expander("Request Example (HTTPS)")
+    request_example.write("Here's the request URL with parameter values so you use the REST API:")
+    try:
+        request_str = submission["url"]
+    except:
+        request_str = user_auth.request_user_access("PLACEHOLDER", "PLACEHOLDER", "PLACEHOLDER", "PLACEHOLDER", "PLACEHOLDER", "PLACEHOLDER", "PLACEHOLDER", 0.0000, False)["url"] #This should return a failure, but the URL should be intact
+    request_example.write(request_str)
+    request_example.write("""Work with a language of your choice by substituting the placeholders or submitted info with your own values. 
+Then, using a https library, make an appropriate call to the endpoint. After completing the web request, use a json tool to deserialize the byte response into a native object and access its properties:""")
+    try:
+        print(submission)
+        request_example.write(submission)
+    except:
+        request_example.write(results.response(True,True,message="This is an example response", url = request_str))
 
 
-
-
-#Endpoint 5
+#Endpoint 6: /user/change_password/
 #This is (or are) the Client Function(s): user_auth.change_password(email: str, admin_user_id: str, group_name: str)
-#This is the Resource Location: /user/change_password/
+#This is the Resource Location: 
 #This is the Demo Interface: 
     col_1, col_2 = st.columns(2)
     col_1.subheader("Change User Password")
@@ -375,9 +445,8 @@ Then, using a https library, make an appropriate call to the endpoint. After com
     except:
         request_example.write(results.response(True,True,message="This is an example response", url = request_str))
 
-#Endpoint 6
+#Endpoint 7: /user/delete_account/
 #This is (or are) the Client Function(s): user_auth.delete_user(user_id: str, password: str, admin_user_id: str, group_name: str)
-#This is the Resource Location: /user/delete_account/
 #This is the Demo Interface: 
     col_1, col_2 = st.columns(2)
     col_1.subheader("Delete User Account")

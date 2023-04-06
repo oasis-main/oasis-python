@@ -808,69 +808,6 @@ Then, using a https library, make an appropriate call to the endpoint. After com
     except:
         request_example.write(results.response(True,True,message="This is an example response", url = request_str))
 
-
-#Endpoint: /admin/user_access_request/
-#Function: admin_auth.request_user_access(admin_user_id: str, admin_id_token: str, user_id: str, group: str, data_type: Literal["allowance_count","credit_balance","clearance_code"], field: str, required: str, emissions_kg: float = 0.0000, check_only: bool = False)
-#Additional Response Data (submission["data"]): None
-#Demo Interface: 
-    col_1, col_2 = st.columns(2)
-    col_1.subheader("Request User Access")
-    col_2.write("")
-    col_2.write("REST API (POST): https://auth.oasis-x.io/admin/user_access_request/")
-    st.write("*Request access to a user's data*")
-    request_user_form = st.form("Request User Access")
-
-    admin_user_id = request_user_form.text_input("Admin User ID", help="This will auto-load if you've done the session login above.", value = st.session_state["admin_user_id"])
-    admin_id_token = request_user_form.text_input("Admin Session ID Token", help="This will also auto-load if you've done the session login above ", value = st.session_state["admin_id_token"])
-    user_id = request_user_form.text_input("User ID", help="The ID of the user you want to request access to.")
-    group = request_user_form.text_input("Group", help="The group the user belongs to.")
-    data_type = request_user_form.selectbox("Data Type", ["allowance_count","credit_balance","clearance_code"])
-    field = request_user_form.text_input("Field", help="The field you want to access.")
-    required = request_user_form.text_input("Required", help="The required value for the field.")
-    emissions_kg = request_user_form.number_input("Emissions (kg)", help="The emissions associated with the request.", value = 0.0000)
-    check_only = request_user_form.checkbox("Check Only", help="Check if the request is valid without actually making the request.")
-
-    # Every form must have a submit button.
-    submitted = request_user_form.form_submit_button("Request User Access")
-    if submitted:
-        submission = admin_auth.request_user_access(admin_user_id, admin_id_token, user_id, group, data_type, field, required, emissions_kg, check_only)
-        if submission["attempt"] == "succeeded":
-            st.success(submission["message"])
-        else:
-            st.error(submission["message"])
-
-    #Provide a code example 
-    code_example = st.expander("Code Example (Python)")
-    code_example.write("Here's how to imlement this in your app using the oasis-python library:")
-    code_example.code(
-"""
-from clients import admin_auth #Make sure the environment is set up
-user_access_result = admin_auth.request_user_access(admin_user_id, admin_id_token, user_id, group, data_type, field, required, emissions_kg, check_only) # pings authentication server
-
-user_access_result["attempt"] # "succeeded" or "failed"
-user_access_result["allowed"] # "ok" or "no
-user_access_result["message"] # information about the request
-user_access_result["url"] # url of the web request made to server
-user_access_result["response_code"] # status of the http request  
-
-"""
-, language = "python") #Leave this off to the left or streamlit will indent it, unfortunately
-    
-    #Show how the request is put together
-    request_example = st.expander("Request Example (HTTPS)")
-    request_example.write("Here's the request URL with parameter values so you use the REST API:")
-    try:
-        request_str = submission["url"]
-    except:
-        request_str = admin_auth.request_user_access("PLACEHOLDER", "PLACEHOLDER", "PLACEHOLDER", "PLACEHOLDER", "PLACEHOLDER", "PLACEHOLDER", "PLACEHOLDER", 0.0000, False)["url"] #This should return a failure, but the URL should be intact
-    request_example.write(request_str)
-    request_example.write("""Work with a language of your choice by substituting the placeholders or submitted info with your own values. Then, using a https library, make an appropriate call to the endpoint. After completing the web request, use a json tool to deserialize the byte response into a native object and access its properties:""")
-    try:
-        print(submission)
-        request_example.write(submission)
-    except:
-        request_example.write(results.response(True,True,message="This is an example response", url = request_str))
-
 #Endpoint: /admin/reset_user/
 #Function: admin_auth.reset_user(admin_user_id: str, admin_id_token: str, user_id: str, group_name: str)
 #Additional Response Data (submission["data"]):  None
