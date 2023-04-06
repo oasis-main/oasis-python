@@ -17,19 +17,19 @@ st.set_page_config(page_title=" Oasis-Admin",
 from clients import admin_auth
 from utils import results
 
-# #Set session state in case page is refreshed or user otherwise lands on it before initialization
-# if "admin_user_id" not in st.session_state:
-#     st.session_state["admin_user_id"] = None
-# if "group_name" not in st.session_state:
-#     st.session_state["group_name"] = None
-# if "admin_refresh_token" not in st.session_state:
-#     st.session_state["admin_refresh_token"] = None
-# if "admin_user_id" not in st.session_state:
-#     st.session_state["admin_user_id"] = None
-# if "admin_id_token" not in st.session_state:
-#     st.session_state["admin_id_token"] = None
-# if "admin_email" not in st.session_state:
-#     st.session_state["admin_email"] = None
+#Set session state in case page is refreshed or user otherwise lands on it before initialization
+if "admin_user_id" not in st.session_state:
+    st.session_state["admin_user_id"] = None
+if "group_name" not in st.session_state:
+    st.session_state["group_name"] = None
+if "admin_refresh_token" not in st.session_state:
+    st.session_state["admin_refresh_token"] = None
+if "admin_user_id" not in st.session_state:
+    st.session_state["admin_user_id"] = None
+if "admin_id_token" not in st.session_state:
+    st.session_state["admin_id_token"] = None
+if "admin_email" not in st.session_state:
+    st.session_state["admin_email"] = None
 
 def run():
     st.title("Oasis-Auth (Admin API)")
@@ -498,6 +498,196 @@ Then, using a https library, make an appropriate call to the endpoint. After com
     except:
         request_example.write(results.response(True,True,message="This is an example response", url = request_str))
 
+#Endpoint: /admin/get_uid_by_email/
+#Function: admin_auth.get_user_id_by_email(user_email: str, admin_user_id: str, admin_id_token: str, group_name: str)
+#Additional Response Data (submission["data"]):  user_id: str
+#Demo Interface: 
+    col_1, col_2 = st.columns(2)
+    col_1.subheader("Get User ID By Email")
+    col_2.write("")
+    col_2.write("REST API (GET): https://auth.oasis-x.io/admin/get_uid_by_email/")
+    st.write("*Get a user's ID by their email address*")
+    get_uid_form = st.form("Get User ID By Email")
+
+    admin_user_id = get_uid_form.text_input("Admin User ID", help="This will auto-load if you've done the session login above.", value = st.session_state["admin_user_id"])
+    admin_id_token = get_uid_form.text_input("Admin Session ID Token", help="This will also auto-load if you've done the session login above ", value = st.session_state["admin_id_token"])
+    user_email = get_uid_form.text_input("User Email", help="The email address of the user you want to get the ID of.")
+    group_name = get_uid_form.text_input("Group Name", help="The group the user belongs to.")
+
+    # Every form must have a submit button.
+    submitted = get_uid_form.form_submit_button("Get User ID")
+    if submitted:
+        submission = admin_auth.get_user_id_by_email(user_email, admin_user_id, admin_id_token, group_name)
+        if submission["attempt"] == "succeeded":
+            st.success(submission["message"])
+        else:
+            st.error(submission["message"])
+
+    #Provide a code example 
+    code_example = st.expander("Code Example (Python)")
+    code_example.write("Here's how to imlement this in your app using the oasis-python library:")
+    code_example.code(
+"""
+from clients import admin_auth #Make sure the environment is set up
+user_id_result = admin_auth.get_user_id_by_email(user_email, admin_user_id, admin_id_token, group_name) # pings authentication server
+
+#View the user's ID
+user_id_result["data"]["user_id"] # user's ID
+
+user_id_result["attempt"] # "succeeded" or "failed"
+user_id_result["allowed"] # "ok" or "no
+user_id_result["message"] # information about the request
+user_id_result["url"] # url of the web request made to server
+user_id_result["response_code"] # status of the http request  
+
+"""
+, language = "python") #Leave this off to the left or streamlit will indent it, unfortunately
+    
+    #Show how the request is put together
+    request_example = st.expander("Request Example (HTTPS)")
+    request_example.write("Here's the request URL with parameter values so you use the REST API:")
+    try:
+        request_str = submission["url"]
+        #If the above worked it means that we may have some valid values. Let's save them to session state
+        st.session_state["user_id"] = submission["data"]["user_id"]
+    except:
+        request_str = admin_auth.get_user_id_by_email("PLACEHOLDER", "PLACEHOLDER", "PLACEHOLDER", "PLACEHOLDER")["url"] #This should return a failure, but the URL should be intact
+    request_example.write(request_str)
+    request_example.write("""Work with a language of your choice by substituting the placeholders or submitted info with your own values. 
+Then, using a https library, make an appropriate call to the endpoint. After completing the web request, use a json tool to deserialize the byte response into a native object and access its properties:""")
+    try:
+        print(submission)
+        request_example.write(submission)
+    except:
+        request_example.write(results.response(True,True,message="This is an example response", url = request_str))
+
+#Endpoint: /admin/get_user_email/
+#Function: admin_auth.get_user_email(user_id: str, admin_user_id: str, admin_id_token: str, group_name: str)
+#Additional Response Data (submission["data"]):  user_email: str
+#Demo Interface: 
+
+    col_1, col_2 = st.columns(2)
+    col_1.subheader("Get User Email")
+    col_2.write("")
+    col_2.write("REST API (GET): https://auth.oasis-x.io/admin/get_user_email/")
+    st.write("*Get a user's email address by their ID*")
+    get_email_form = st.form("Get User Email")
+
+    admin_user_id = get_email_form.text_input("Admin User ID", help="This will auto-load if you've done the session login above.", value = st.session_state["admin_user_id"])
+    admin_id_token = get_email_form.text_input("Admin Session ID Token", help="This will also auto-load if you've done the session login above ", value = st.session_state["admin_id_token"])
+    user_id = get_email_form.text_input("User ID", help="The ID of the user you want to get the email address of.")
+    group_name = get_email_form.text_input("Group Name", help="The group the user belongs to.")
+
+    # Every form must have a submit button.
+    submitted = get_email_form.form_submit_button("Get User Email")
+    if submitted:
+        submission = admin_auth.get_user_email(user_id, admin_user_id, admin_id_token, group_name)
+        if submission["attempt"] == "succeeded":
+            st.success(submission["message"])
+        else:
+            st.error(submission["message"])
+
+    #Provide a code example 
+    code_example = st.expander("Code Example (Python)")
+    code_example.write("Here's how to imlement this in your app using the oasis-python library:")
+    code_example.code(
+"""
+from clients import admin_auth #Make sure the environment is set up
+user_email_result = admin_auth.get_user_email(user_id, admin_user_id, admin_id_token, group_name) # pings authentication server
+
+#View the user's email
+user_email_result["data"]["user_email"] # user's email
+
+user_email_result["attempt"] # "succeeded" or "failed"
+user_email_result["allowed"] # "ok" or "no
+user_email_result["message"] # information about the request
+user_email_result["url"] # url of the web request made to server
+user_email_result["response_code"] # status of the http request  
+
+"""
+, language = "python") #Leave this off to the left or streamlit will indent it, unfortunately
+    
+    #Show how the request is put together
+    request_example = st.expander("Request Example (HTTPS)")
+    request_example.write("Here's the request URL with parameter values so you use the REST API:")
+    try:
+        request_str = submission["url"]
+        #If the above worked it means that we may have some valid values. Let's save them to session state
+        st.session_state["user_email"] = submission["data"]["user_email"]
+    except:
+        request_str = admin_auth.get_user_email("PLACEHOLDER", "PLACEHOLDER", "PLACEHOLDER", "PLACEHOLDER")["url"] #This should return a failure, but the URL should be intact
+    request_example.write(request_str)
+    request_example.write("""Work with a language of your choice by substituting the placeholders or submitted info with your own values. 
+Then, using a https library, make an appropriate call to the endpoint. After completing the web request, use a json tool to deserialize the byte response into a native object and access its properties:""")
+    try:
+        print(submission)
+        request_example.write(submission)
+    except:
+        request_example.write(results.response(True,True,message="This is an example response", url = request_str))
+
+#Endpoint: /admin/get_user_info/
+#Function: admin_auth.get_user_info(user_id: str, admin_user_id: str, admin_id_token: str, group_name: str)
+#Additional Response Data (submission["data"]):  Dict["IAM": Dict[str, Any], "Oasis-Ecosystem": Dict[str, Any] ]
+#Demo Interface: 
+
+    col_1, col_2 = st.columns(2)
+    col_1.subheader("Get User Info")
+    col_2.write("")
+    col_2.write("REST API (GET): https://auth.oasis-x.io/admin/get_user_info/")
+    st.write("*Get a user's info*")
+    get_user_info_form = st.form("Get User Info")
+
+    admin_user_id = get_user_info_form.text_input("Admin User ID", help="This will auto-load if you've done the session login above.", value = st.session_state["admin_user_id"])
+    admin_id_token = get_user_info_form.text_input("Admin Session ID Token", help="This will also auto-load if you've done the session login above ", value = st.session_state["admin_id_token"])
+    user_id = get_user_info_form.text_input("User ID", help="The ID of the user you want to get the info of.", value = st.session_state["user_id"])
+    group_name = get_user_info_form.text_input("Group Name", help="The group the user belongs to.")
+
+    # Every form must have a submit button.
+    submitted = get_user_info_form.form_submit_button("Get User Info")
+    if submitted:
+        submission = admin_auth.get_user_info(user_id, admin_user_id, admin_id_token, group_name)
+        if submission["attempt"] == "succeeded":
+            st.success(submission["message"])
+        else:
+            st.error(submission["message"])
+
+    #Provide a code example 
+    code_example = st.expander("Code Example (Python)")
+    code_example.write("Here's how to imlement this in your app using the oasis-python library:")
+    code_example.code(
+"""
+from clients import admin_auth #Make sure the environment is set up
+user_info_result = admin_auth.get_user_info(user_id, admin_user_id, admin_id_token, group_name) # pings authentication server
+
+#View the user's info
+user_info_result["data"]["IAM"] # user's IAM info
+user_info_result["data"]["Oasis-Ecosystem"] # user's Oasis-Ecosystem info
+
+user_info_result["attempt"] # "succeeded" or "failed"
+user_info_result["allowed"] # "ok" or "no
+user_info_result["message"] # information about the request
+user_info_result["url"] # url of the web request made to server
+user_info_result["response_code"] # status of the http request  
+
+"""
+, language = "python") #Leave this off to the left or streamlit will indent it, unfortunately
+    
+    #Show how the request is put together
+    request_example = st.expander("Request Example (HTTPS)")
+    request_example.write("Here's the request URL with parameter values so you use the REST API:")
+    try:
+        request_str = submission["url"]
+    except:
+        request_str = admin_auth.get_user_info("PLACEHOLDER", "PLACEHOLDER", "PLACEHOLDER", "PLACEHOLDER")["url"] #This should return a failure, but the URL should be intact
+    request_example.write(request_str)
+    request_example.write("""Work with a language of your choice by substituting the placeholders or submitted info with your own values. 
+Then, using a https library, make an appropriate call to the endpoint. After completing the web request, use a json tool to deserialize the byte response into a native object and access its properties:""")
+    try:
+        print(submission)
+        request_example.write(submission)
+    except:
+        request_example.write(results.response(True,True,message="This is an example response", url = request_str))
+
 #Endpoint: /admin/read_user/
 #Function: admin_auth.read_user_metadata(admin_user_id: str, admin_id_token: str, user_id: str, group: str)
 #Additional Response Data (submission["data"]):  user_id: Dict[str,Any]
@@ -574,7 +764,7 @@ Then, using a https library, make an appropriate call to the endpoint. After com
     admin_id_token = write_user_form.text_input("Admin Session ID Token", help="This will also auto-load if you've done the session login above ", value = st.session_state["admin_id_token"])
     user_id = write_user_form.text_input("User ID", help="The ID of the user you want to write metadata to.")
     group = write_user_form.text_input("Group", help="The group the user belongs to.")
-    dictionary = write_user_form.text_input("Dictionary", help="The dictionary of metadata you want to write to the user. Must be a string representation of a dictionary.")
+    dictionary = write_user_form.text_input("Dictionary", help="The dictionary of metadata you want to write to the user")
 
     # Every form must have a submit button.
     submitted = write_user_form.form_submit_button("Write User Metadata")

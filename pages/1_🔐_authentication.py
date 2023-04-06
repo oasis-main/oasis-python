@@ -125,7 +125,6 @@ Then, using a https library, make an appropriate call to the endpoint. After com
 
 
 
-
 #Second endpoint display: /user/login/password
     col_1, col_2 = st.columns(2)
     col_1.subheader("User Password Login")
@@ -431,6 +430,7 @@ delete_result["url"] # url of the web request made to server
     request_example.write("Here's the request URL with parameter values so you use the REST API:")
     try:
         request_str = submission["url"]
+
     except:
         request_str = user_auth.delete_user("PLACEHOLDER", "PLACEHOLDER", "PLACEHOLDER", "PLACEHOLDER")["url"] #This should return a failure, but the URL should be intact
     request_example.write(request_str)
