@@ -132,23 +132,26 @@ Then, using a https library, make an appropriate call to the endpoint. After com
                 metadata_r = transactions.read_user_metadata(user_id)
                 if metadata_r["attempt"] == "succeeded":
                     st.success(metadata_r["message"])
-                    data = metadata_r["data"]
+                    data = metadata_r["data"][user_id]
+                    print(f"data: {data}")
                     if "stripe_customer_id" in data and data["stripe_customer_id"]:
-                        stripe_customer_id = data["customer_id"]
+                        stripe_customer_id = data["stripe_customer_id"]
+                        print(f"retriving stripe_customer_id: {stripe_customer_id}")
                         customer_r = transactions.get_customer_by_stripe_id(stripe_customer_id)
                         #Get customer data
                         if customer_r["attempt"] == "succeeded":
+                            print(f"customer_r: {customer_r}")
                             customer = customer_r["data"]
                             st.session_state["customer"] = customer
                         else:
                             st.error(customer_r["message"])
                         #Get subscription data
-                        customer_subscription_r = transactions.list_customer_subscriptions(stripe_customer_id)
-                        if customer_subscription_r["attempt"] == "succeeded":
-                            customer_subscriptions = customer_subscriptions_r["data"]
-                            st.session_state["customer_subscriptions"] = customer_subscriptions
-                        else:
-                            st.error(customer_subscription_r["message"])
+                        # customer_subscription_r = transactions.list_customer_subscriptions(stripe_customer_id)
+                        # if customer_subscription_r["attempt"] == "succeeded":
+                        #     customer_subscriptions = customer_subscriptions_r["data"]
+                        #     st.session_state["customer_subscriptions"] = customer_subscriptions
+                        # else:
+                        #     st.error(customer_subscription_r["message"])
                 else:
                     st.error(metadata_r["message"])
             else: st.error(create_session_r["message"])
