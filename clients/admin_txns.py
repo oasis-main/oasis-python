@@ -202,6 +202,6 @@ def create_checkout_session(user_id: str, id_token: str, price_id: str, quantity
     json_body = {'user_id': user_id, 'id_token': id_token, 'price_id': price_id, 'quantity': quantity, 'mode': mode, 'success_url': success_url, 'cancel_url': cancel_url }
     r = httpx.post(path, json = json_body)
     attempt_result = orjson.loads(r.text)
+    print(f"attempt_result: {attempt_result}")
     data = attempt_result.get('data')
     return data
-

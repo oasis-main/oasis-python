@@ -232,31 +232,37 @@ Then, using a https library, make an appropriate call to the endpoint. After com
     col_2.write("REST API (POST): https://markets.oasis-x.io/account/create/")
     st.write("*Create a Stripe Subscription object for the logged in user.*")
     new_subscription_form = st.form("Create Subscription")
+    stripe_prices = transactions.list_prices()
+    formatted_prices = {}
+    for sp in stripe_prices:
+        key = sp.get('product').get('name') + ' - $' + str(sp.get('unit_amount') / 100) + '0/' + sp.get('recurring').get('interval')
+        formatted_prices[key] = sp
+    price_list = formatted_prices.keys()
+    name = new_subscription_form.text_input("Name", disabled=True, value=st.session_state.customer["name"])
+    price_key = new_subscription_form.selectbox('Price',price_list)
     if st.session_state["customer_subscriptions"]: 
         new_subscription_form.write("Existing subscriptions:")
-        name = new_subscription_form.text_input("Name", disabled=True, value=st.session_state.customer["name"])
-        email = new_subscription_form.text_input("Email", disabled=True, value=st.session_state.customer["email"])
-        user_id = new_subscription_form.text_input("Oasis-X User ID", disabled=True, value=st.session_state.customer.metadata["oasis_x_id"])
-    # else:
-    #     name = new_customer_form.text_input("Name")
-    #     email = new_customer_form.text_input("Email", disabled=True, value=st.session_state["user_email"])
-    #     user_id = new_customer_form.text_input("Oasis-X User ID", disabled=True, value=st.session_state["user_id"])
-    #     submitted = new_customer_form.form_submit_button("Create Customer")
-    #     if submitted:
-    #         submission = transactions.create_customer(user_id, email, name)
-    #         #Need to add attempt/allowed/message pattern to transactions api responses
-    #         print(f"subscription creation submission:{submission}")
-    #         if submission and submission["id"]:
-    #             stripe_subscription_id = submission["id"]
-    #             st.session_state.metadata["stripe_subscription_id"] = stripe_subscription_id
-    #             save_subscription_id_r = transactions.write_user_metadata(user_id, st.session_state.metadata)
-    #             print(f"save_customer_id_r: {save_customer_id_r}")
-    #             if save_customer_id_r["attempt"] == "succeeded":   
-    #                 st.success(save_customer_id_r)
-    #             else:
-    #                 str.error(save_customer_id_r)
-    #         else:
-    #             st.error(submission)
+        new_subscription_form.dataframe(st.session_state["customer_subscriptions"])
+    checkout = new_subscription_form.form_submit_button("Checkout")
+    if checkout:
+        #Stripe unit amounts are specified in cents, and are best passed as integers
+        # new_customer = transactions.create_subscription(oasis_x_id, email_addr, name)
+        price = formatted_prices.get(price_key)
+        price_id = price['id']
+        items = transactions.create_line_item(price_id)
+        mode = 'subscription'
+        success_url = client_uri + '/success'
+        cancel_url = client_uri + '/cancel'
+        checkout_session = transactions.create_checkout_session(st.session_state["user_id"],
+            st.session_state["id_token"],
+            price_id,
+            1,
+            mode,
+            success_url,
+            cancel_url)
+        print(f'checkout_session: {checkout_session}')
+        link='Complete checkout [here](' + checkout_session.get('url') + ')'
+        st.markdown(link,unsafe_allow_html=True)
     
     #Fifth endpoint display: /account/create
     col_1, col_2 = st.columns(2)
@@ -296,7 +302,6 @@ Then, using a https library, make an appropriate call to the endpoint. After com
 
 
     st.subheader('Add New Oasis-X Subscription Product')
-    
     intervals={
         'Yearly': 'year',
         'Monthly':'month',
