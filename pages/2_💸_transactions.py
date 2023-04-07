@@ -202,7 +202,8 @@ Then, using a https library, make an appropriate call to the endpoint. After com
         new_customer_form.write("A stripe customer has already been created for this user")
         name = new_customer_form.text_input("Name", disabled=True, value=st.session_state.customer["name"])
         email = new_customer_form.text_input("Email", disabled=True, value=st.session_state.customer["email"])
-        user_id = new_customer_form.text_input("Oasis-X User ID", disabled=True, value=st.session_state.customer.metadata["oasis_x_id"])
+        user_id = new_customer_form.text_input("Oasis-X User ID", disabled=True, value=st.session_state.customer["metadata"]["oasis_x_id"])
+        submitted = new_customer_form.form_submit_button("Create Customer", disabled=True)     
     else:
         name = new_customer_form.text_input("Name")
         email = new_customer_form.text_input("Email", disabled=True, value=st.session_state["user_email"])
@@ -215,7 +216,7 @@ Then, using a https library, make an appropriate call to the endpoint. After com
             if submission and submission["id"]:
                 stripe_customer_id = submission["id"]
                 st.session_state.metadata["stripe_customer_id"] = stripe_customer_id
-                save_customer_id_r = transactions.write_user_metadata(user_id, st.session_state.metadata)
+                save_customer_id_r = transactions.write_user_metadata(user_id, st.session_state["metadata"])
                 print(f"save_customer_id_r: {save_customer_id_r}")
                 if save_customer_id_r["attempt"] == "succeeded":   
                     st.success(save_customer_id_r)
