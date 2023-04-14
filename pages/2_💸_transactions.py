@@ -4,6 +4,7 @@ import os
 
 
 import streamlit as st
+import streamlit.components.v1 as components
 st.set_page_config(page_title=" Oasis-Markets", 
                    page_icon = 'media/icon.png', 
                    layout = "wide")
@@ -37,7 +38,9 @@ if "metadata" not in st.session_state:
         "stripe_customer_id": ""
     }
 if "customer" not in st.session_state:
-    st.session_state["customer"] = {}
+    st.session_state["customer"] = {
+        "name": ""
+    }
 if "customer_subscriptions" not in st.session_state:
     st.session_state["customer_subscriptions"] = []
 
@@ -198,7 +201,7 @@ Then, using a https library, make an appropriate call to the endpoint. After com
     col_2.write("REST API (POST): https://markets.oasis-x.io/account/create/")
     st.write("*Create a Stripe Customer object for the logged in user. Customers represent users who will be charged by Oasis-X.*")
     new_customer_form = st.form("Create Stripe Customer")
-    if st.session_state["customer"]: 
+    if st.session_state["customer"] and st.session_state["customer"]["name"]: 
         new_customer_form.write("A stripe customer has already been created for this user")
         name = new_customer_form.text_input("Name", disabled=True, value=st.session_state.customer["name"])
         email = new_customer_form.text_input("Email", disabled=True, value=st.session_state.customer["email"])
@@ -260,9 +263,8 @@ Then, using a https library, make an appropriate call to the endpoint. After com
             mode,
             success_url,
             cancel_url)
-        print(f'checkout_session: {checkout_session}')
-        link='Complete checkout [here](' + checkout_session.get('url') + ')'
-        st.markdown(link,unsafe_allow_html=True)
+        link='Complete checkout [here](' + checkout_session.get('url') + ')')
+        new_subscription_form.markdown(link,unsafe_allow_html=True)
     
     #Fifth endpoint display: /account/create
     col_1, col_2 = st.columns(2)
