@@ -263,7 +263,7 @@ Then, using a https library, make an appropriate call to the endpoint. After com
             mode,
             success_url,
             cancel_url)
-        link='Complete checkout [here](' + checkout_session.get('url') + ')')
+        link='Complete checkout [here](' + checkout_session.get('url') + ')'
         new_subscription_form.markdown(link,unsafe_allow_html=True)
     
     #Fifth endpoint display: /account/create
